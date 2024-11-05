@@ -13,7 +13,7 @@ class FlutterApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
 
-      title: "eCommerce App",
+      title: "Social Media App",
       debugShowCheckedModeBanner: false,
       home: SplashScreen(),
     );

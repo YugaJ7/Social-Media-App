@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:social_media_app/screens/homescreen.dart';
 import 'package:social_media_app/screens/splash_screen.dart';
 
 
@@ -15,7 +16,7 @@ class FlutterApp extends StatelessWidget {
 
       title: "Social Media App",
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      home: HomeScreen(),
     );
   }
 }

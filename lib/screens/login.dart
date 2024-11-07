@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:social_media_app/screens/homescreen.dart';
 import 'package:social_media_app/screens/register.dart';
 import 'package:social_media_app/screens/util.dart';
 
@@ -24,10 +25,10 @@ class _LoginState extends State<Login> {
         password: password,
       );
 
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => HomeScreen()),
-      // );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
     } on FirebaseAuthException catch(e){
     showErrorMessage(e.code);
   }

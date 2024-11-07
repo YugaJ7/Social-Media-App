@@ -1,7 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget{
+  const HomeScreen({super.key});
+
   // final int index;
   // const HomeScreen({required this.index});
   @override

@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:social_media_app/screens/login.dart';
+import 'package:social_media_app/screens/homescreen.dart';
 import 'package:social_media_app/screens/onboarding.dart';
 
 class AuthPage extends StatelessWidget {
@@ -14,7 +14,7 @@ class AuthPage extends StatelessWidget {
           builder: ((context, snapshot) {
             if (snapshot.hasData) {
               snapshot.data!.displayName ?? "User";
-              return Login();
+              return HomeScreen();
             } else {
               return  OnboardingScreen();
             }

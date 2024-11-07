@@ -1,4 +1,8 @@
 {
+<<<<<<< HEAD
     "cmake.sourceDirectory": "C:/Users/yugaj/Documents/Social-Media-App/linux",
     "java.configuration.updateBuildConfiguration": "interactive"
+=======
+    "dart.flutterSdkPath": null
+>>>>>>> e6fb4c25ee4ed6d01d1d74090b6ed121709ec9ec
 }

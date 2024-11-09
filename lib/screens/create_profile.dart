@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:social_media_app/controller/navbar.dart';
 import 'package:social_media_app/screens/homescreen.dart';
 import 'package:social_media_app/screens/util.dart';
 import 'package:social_media_app/services/appwrite_service.dart';
@@ -54,7 +55,7 @@ class _CreateProfileState extends State<CreateProfile> {
 
         Navigator.pushReplacement(context,
                 MaterialPageRoute(
-                  builder: (BuildContext context) => HomeScreen()));
+                  builder: (BuildContext context) => Navbar()));
       } catch (e) {
         print("Error saving profile: $e");
       }

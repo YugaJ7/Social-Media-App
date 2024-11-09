@@ -10,7 +10,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
 
   @override
 
@@ -28,7 +27,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
     });
   }
   @override
@@ -40,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           flexibleSpace: Padding(
-            padding: const EdgeInsets.only(top: 50, right: 8, left:56),
+            padding: const EdgeInsets.only(top: 50),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -65,8 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ]
                   ),
                 ),
-                IconButton(onPressed: (){}, icon: Icon(FontAwesomeIcons.bell))
-              ],
+                Positioned(left: 4,child: IconButton(onPressed: (){}, icon: Icon(FontAwesomeIcons.bell)))
+              ]
             ),
           ),
           ),
@@ -220,31 +218,31 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.white,
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          selectedItemColor: Colors.black,  // Color for selected item (black)
-          unselectedItemColor: Colors.grey,
-          items: const[
-            BottomNavigationBarItem(
-                icon: Icon(FontAwesomeIcons.house),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(FontAwesomeIcons.magnifyingGlass),
-              label: '',
-            ),
-          BottomNavigationBarItem(
-              icon: Icon(FontAwesomeIcons.envelope),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-              icon: Icon(FontAwesomeIcons.user),
-            label: '',
-          ),
-        ],
-        ),
+        // bottomNavigationBar: BottomNavigationBar(
+        //   backgroundColor: Colors.white,
+        //   currentIndex: _selectedIndex,
+        //   onTap: _onItemTapped,
+        //   selectedItemColor: Colors.black,  // Color for selected item (black)
+        //   unselectedItemColor: Colors.grey,
+        //   items: const[
+        //     BottomNavigationBarItem(
+        //         icon: Icon(FontAwesomeIcons.house),
+        //       label: '',
+        //     ),
+        //     BottomNavigationBarItem(
+        //         icon: Icon(FontAwesomeIcons.magnifyingGlass),
+        //       label: '',
+        //     ),
+        //   BottomNavigationBarItem(
+        //       icon: Icon(FontAwesomeIcons.envelope),
+        //     label: '',
+        //   ),
+        //   BottomNavigationBarItem(
+        //       icon: Icon(FontAwesomeIcons.user),
+        //     label: '',
+        //   ),
+        // ],
+        // ),
         floatingActionButton: FloatingActionButton(
             onPressed: (){},
           backgroundColor: Colors.black,

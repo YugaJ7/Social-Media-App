@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:social_media_app/controller/navbar.dart';
 import 'package:social_media_app/screens/homescreen.dart';
 import 'package:social_media_app/screens/register.dart';
 import 'package:social_media_app/screens/util.dart';
@@ -26,7 +27,7 @@ class _LoginState extends State<Login> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
+        MaterialPageRoute(builder: (context) => Navbar()),
       );
     } catch(e){
     showErrorMessage(e.toString());

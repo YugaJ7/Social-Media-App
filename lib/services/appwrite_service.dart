@@ -32,19 +32,19 @@ class AppwriteService {
       return null;
     }
   }
+  //Saving User Login Credential in database
   Future<void> addUserToDatabase(String userId, String username, String email,String password) async {
     try {
       await database.createDocument(
-        databaseId: '672e094b003b610078c0',  // Replace with your database ID
-        collectionId: '672e095b000150bfacb0',  // Replace with your collection ID
-        documentId: userId,  // Use the user ID from registration
+        databaseId: '672e094b003b610078c0',  
+        collectionId: '672e095b000150bfacb0', 
+        documentId: userId, 
         data: {
           'username': username,
           'email': email,
           'password': password
         },
       );
-      print("User data added to database!");
     } catch (e) {
       print('Database error: $e');
     }
@@ -67,7 +67,6 @@ class AppwriteService {
   Future<void> logoutUser() async {
     try {
       await account.deleteSession(sessionId: 'current');
-      print("Logged out successfully!");
     } catch (e) {
       print("Logout error: $e");
     }
@@ -87,8 +86,8 @@ class AppwriteService {
   Future<String?> uploadProfileImage(String userId,File imageFile) async {
     try {
       final result = await storage.createFile(
-        bucketId: '672f4201001100487dad',  // Replace with your Appwrite bucket ID
-        fileId: userId,  // Generate a unique ID for the file
+        bucketId: '672f4201001100487dad',  
+        fileId: userId,  
         file: InputFile.fromPath(path: imageFile.path),
       );
       return result.$id;
@@ -98,13 +97,13 @@ class AppwriteService {
     }
   }
 
-  // Add profile data to the Appwrite database
+  // Add profile data to the database
   Future<void> createProfile(String userId, String username, String displayName, String bio, String interest, String location, String? imageId) async {
     try {
       await database.createDocument(
-        databaseId: '672e094b003b610078c0',  // Replace with your database ID
-        collectionId: '672e09f40035b32645dc',  // Replace with your profiles collection ID
-        documentId: userId,  // Use the Appwrite user ID
+        databaseId: '672e094b003b610078c0',
+        collectionId: '672e09f40035b32645dc', 
+        documentId: userId,  
         data: {
           'username': username,
           'displayName': displayName,

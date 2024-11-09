@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
+import 'package:flutter/material.dart';
 
 class AppwriteService {
   late Client client;
@@ -71,6 +72,30 @@ class AppwriteService {
       print("Logout error: $e");
     }
   }
+  Future<void> deleteAccount(String userId) async {
+    // Implement delete account functionality with a confirmation dialog
+    // showDialog(
+    //   context: context,
+    //   builder: (context) => AlertDialog(
+    //     title: Text('Delete Account'),
+    //     content: Text('Are you sure you want to delete your account? This action cannot be undone.'),
+    //     actions: [
+    //       TextButton(
+    //         onPressed: () => Navigator.of(context).pop(),
+    //         child: Text('Cancel'),
+    //       ),
+    //       TextButton(
+    //         onPressed: () async {
+              await account.deleteIdentity(identityId: userId);
+    //           Navigator.of(context).pushReplacementNamed('/login');
+    //         },
+    //         child: Text('Delete', style: TextStyle(color: Colors.red)),
+    //       ),
+    //     ],
+    //   ),
+    // );
+  }
+
 
   // Check if there’s an active user session
   Future<models.Session?> getCurrentSession() async {
@@ -119,5 +144,87 @@ class AppwriteService {
     }
   }
 
+// Fetch username from database
+Future<Map<String, dynamic>?> fetchUserProfile(String userId) async {
+  try {
+    final document = await database.getDocument(
+      databaseId: '672e094b003b610078c0',  // Your database ID
+      collectionId: '672e09f40035b32645dc', // Your collection ID for user profiles
+      documentId: userId,
+    );
 
- }
+    return document.data;
+  } catch (e) {
+    print('Error fetching user profile: $e');
+    return null;
+  }
+}
+
+Future<String?> getCurrentUserId() async {
+    try {
+      final user = await account.get();
+      return user.$id; // Returns the user's ID
+    } catch (e) {
+      print('Error retrieving current user ID: $e');
+      return null;
+    }
+  }
+
+Future<List<String>> fetchUserMedia(String userId) async {
+  try {
+    final files = await storage.listFiles(
+      bucketId: '672f4201001100487dad',
+      queries: [Query.equal('userId', userId)],
+    );
+    return files.files.map((file) => file.$id).toList();
+  } catch (e) {
+    print('Error fetching media files: $e');
+    return [];
+  }
+}
+
+// Update user profile data in the database
+Future<void> updateUserProfile({
+  required String userId,
+  required String username,
+  required String displayName,
+  required String bio,
+  required String interest,
+  required String location,
+  String? profileImageId,
+}) async {
+  try {
+    await database.updateDocument(
+      databaseId: '672e094b003b610078c0',  // Your database ID
+      collectionId: '672e09f40035b32645dc', // Collection ID for user profiles
+      documentId: userId,  // Same user ID to locate the document
+      data: {
+        'username': username,
+        'displayName': displayName,
+        'bio': bio,
+        'interest': interest,
+        'location': location,
+        'profileImageId': profileImageId,
+      },
+    );
+    print("Profile updated successfully!");
+  } catch (e) {
+    print('Error updating profile: $e');
+  }
+}
+
+Future<bool> sendPasswordResetEmail(String email) async {
+  try {
+    await account.createRecovery(
+      email: email,
+      url: 'https://localhost:3000/recovery', // Replace with your app’s reset password URL
+    );
+    return true;
+  } catch (e) {
+    //throw 'Error sending reset email: $e';
+    return false;
+  }
+}
+
+
+}

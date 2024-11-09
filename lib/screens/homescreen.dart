@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ]
                   ),
                 ),
-                Positioned(left: 4,child: IconButton(onPressed: (){}, icon: Icon(FontAwesomeIcons.bell)))
+                IconButton(onPressed: (){}, icon: Icon(FontAwesomeIcons.bell))
               ]
             ),
           ),

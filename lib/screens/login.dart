@@ -14,6 +14,8 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final resetKey = GlobalKey<FormState>();
+  final TextEditingController _resetController = TextEditingController();
   final AppwriteService appwriteService = AppwriteService();
   bool _obscureText = true;
   bool _isChecked = false;
@@ -148,7 +150,83 @@ class _LoginState extends State<Login> {
                       ],
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                        title: Text("Reset Password"),
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                                "Please enter your email we will send a recovery link."),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Form(
+                                              key: resetKey,
+                                              child: TextFormField(
+                                                controller: _resetController,
+                                                validator: (value) => value!
+                                                        .isEmpty
+                                                    ? "Please enter a valid email."
+                                                    : null,
+                                                decoration: InputDecoration(
+                                                  border: OutlineInputBorder(),
+                                                  label: Text("Email"),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text("Cancel")),
+                                          TextButton(
+                                              onPressed: () {
+                                                if (resetKey.currentState!.validate()) {
+                                                  appwriteService.sendPasswordResetEmail( _resetController.text)
+                                                      .then((value) {
+                                                    Navigator.pop(context);
+                                                    if (value) {
+                                                      ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(
+                                                              SnackBar(
+                                                        content: Text(
+                                                          "Recovery Mail Sent",
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white),
+                                                        ),
+                                                        backgroundColor: Colors
+                                                            .green.shade400,
+                                                      ));
+                                                    } else {
+                                                      ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(
+                                                              SnackBar(
+                                                        content: Text(
+                                                          "Cannot Sent Recovery Mail",
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white),
+                                                        ),
+                                                        backgroundColor:
+                                                            Colors.red.shade400,
+                                                      ));
+                                                    }
+                                                  });
+                                                }
+                                              },
+                                              child: Text("Send Link"))
+                                        ],
+                                      ));
+                      },
                       child: Text(
                         "Forgot Password?",
                         style: TextStyle(

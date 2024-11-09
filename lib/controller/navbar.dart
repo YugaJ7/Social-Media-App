@@ -19,7 +19,7 @@ class _NavbarState extends State<Navbar> {
     HomeScreen(),
     SearchPage(),
     MessagePage(),
-    ProfileScreen(),
+    ProfilePage(),
   ];
 
   @override

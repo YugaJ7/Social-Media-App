@@ -4,10 +4,10 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 
 class AppwriteService {
-  late Client client;
-  late Account account;
-  late Databases database;
-  late Storage storage;
+  static late Client client;
+  static late Account account;
+  static late Databases database;
+  static late Storage storage;
 
   AppwriteService() {
     client = Client();
@@ -120,5 +120,22 @@ class AppwriteService {
     }
   }
 
+  static Future<void> uploadImage(File imageFile, String userId)async{
+    try{
+      final file = await storage.createFile(
+        bucketId: '672f4201001100487dad',
+        fileId: ID.unique(),
+        file: InputFile.fromPath(path: imageFile.path),
+      );
+      await storage.updateFile(
+          bucketId: '672f4201001100487dad',
+          fileId: ID.unique(),
+      );
+      print('File uploaded successfully');
+    } catch (e) {
+      print('Error uploading image: $e');
+    }
+  }
 
- }
+
+}

@@ -15,6 +15,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
+  List<String> imageFileIds = [];
   int _selectedIndex = 0;
   String imagePath = "";
   String? userId;
@@ -48,11 +50,47 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+
+  Future<void> deleteImage(String fileId) async {
+    try{
+      await AppwriteService.deletionImage(fileId);
+      setState(() {
+        imageFileIds.remove(fileId); // Remove from the list after deletion
+      });
+    } catch (e) {
+      print('Failed to delete image: $e');
+    }
+  }
+
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
+
+
+  Future<void> _pickAndUploadImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        imagePath = image.path;
+      });
+      File file = File(imagePath);
+      if (userId != null) {
+        try {
+          await AppwriteService.uploadImage(file, userId!);
+        } catch (e) {
+          print("Error uploading image: $e");
+        }
+      } else {
+        print("User ID is null, cannot upload image.");
+      }
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -129,21 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () async{
-            final ImagePicker picker = ImagePicker();
-            final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-            if(image != null){
-              setState(() {
-                imagePath = image.path;
-              });
-              File file = File(imagePath);
-              if (userId != null) {
-                await AppwriteService.uploadImage(file, userId!); // Pass both file and userId
-              } else {
-                print("User ID is null, cannot upload image.");
-              }
-            }
-          },
+          onPressed: _pickAndUploadImage,
           backgroundColor: Colors.black,
           shape: const CircleBorder(),
           child: const Icon(
@@ -157,8 +181,45 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class FeedScreen extends StatelessWidget {
-  const FeedScreen({super.key});
+class FeedScreen extends StatefulWidget {
+  final String mediaId;
+  final String userId;
+  const FeedScreen({
+    Key? key,
+    required this.mediaId,
+    required this.userId,}) : super(key: key);
+
+  @override
+  State<FeedScreen> createState() => _FeedScreenState();
+}
+
+class _FeedScreenState extends State<FeedScreen> {
+  bool isLike = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLikeStatus();
+  }
+
+  Future<void> _checkLikeStatus() async {
+    bool liked = await AppwriteService.isMediaLiked(widget.mediaId, widget.userId);
+    setState(() {
+      isLike = liked;
+    });
+  }
+
+  Future<void> _toggleLike() async {
+    if (isLike) {
+      await AppwriteService.unlikeMedia(widget.mediaId, widget.userId);
+    } else {
+      await AppwriteService.likeMedia(widget.mediaId, widget.userId);
+    }
+    setState(() {
+      isLike = !isLike;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -211,8 +272,10 @@ class FeedScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      onPressed: () {},
-                      icon: const Icon(FontAwesomeIcons.heart, color: Colors.grey),
+                      onPressed:  _toggleLike,
+                      icon: Icon(
+                          isLike? FontAwesomeIcons.solidHeart: FontAwesomeIcons.heart,
+                          color: isLike? Colors.red : Colors.grey),
                     ),
                     IconButton(
                       onPressed: () {},
@@ -276,8 +339,10 @@ class FeedScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      onPressed: () {},
-                      icon: const Icon(FontAwesomeIcons.heart, color: Colors.grey),
+                      onPressed:  _toggleLike,
+                      icon: Icon(
+                          isLike? FontAwesomeIcons.solidHeart: FontAwesomeIcons.heart,
+                          color: isLike? Colors.red : Colors.grey),
                     ),
                     IconButton(
                       onPressed: () {},

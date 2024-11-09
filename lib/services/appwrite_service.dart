@@ -5,7 +5,7 @@ import 'package:appwrite/models.dart' as models;
 
 class AppwriteService {
   static late Client client;
-  static late Account account;
+  late Account account;
   static late Databases database;
   static late Storage storage;
 
@@ -136,5 +136,76 @@ class AppwriteService {
     }
   }
 
+  static Future<void> deletionImage(String fileId) async{
+    try{
+      await storage.deleteFile(
+        bucketId: '672f4201001100487dad',
+        fileId: fileId,
+      );
+      print('File deleted successfully');
+    } catch (e) {
+      print('Error deleting file: $e');
+    }
+  }
+
+  static Future<void> likeMedia(String mediaId, String userId) async{
+    try{
+      await database.createDocument(
+          databaseId: '672e094b003b610078c0',
+          collectionId: '672fbc200005547ac93d',
+          documentId: userId,
+          data: {
+            'mediaId': mediaId,
+            'userId': userId,
+            'isLiked': true,
+          }
+      );
+      print("Media liked successfully.");
+    } catch (e) {
+      print("Error liking media: $e");
+    }
+  }
+
+  static Future<void> unlikeMedia(String mediaId, String userId) async{
+    try{
+      final result = await database.listDocuments(
+        databaseId: '672e094b003b610078c0',
+        collectionId: '672fbc200005547ac93d',
+        queries: [
+          Query.equal('mediaId', mediaId),
+          Query.equal('userId', userId),
+        ],
+      );
+
+      if (result.documents.isNotEmpty) {
+        await database.deleteDocument(
+          databaseId: '672e094b003b610078c0',
+          collectionId: '672fbc200005547ac93d',
+          documentId: result.documents.first.$id,
+        );
+        print("Media unliked successfully.");
+      }
+    } catch (e) {
+      print("Error unliking media: $e");
+    }
+  }
+
+  static Future<bool> isMediaLiked(String mediaId, String userId) async {
+    try {
+      final result = await database.listDocuments(
+        databaseId: '672e094b003b610078c0',
+        collectionId: '672fbc200005547ac93d',
+        queries: [
+          Query.equal('mediaId', mediaId),
+          Query.equal('userId', userId),
+        ],
+      );
+
+      return result.documents.isNotEmpty;
+    } catch (e) {
+      print("Error checking like status: $e");
+      return false;
+    }
+  }
 
 }

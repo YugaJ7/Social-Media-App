@@ -1,9 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:social_media_app/screens/homescreen.dart';
 import 'package:social_media_app/screens/register.dart';
 import 'package:social_media_app/screens/util.dart';
+import 'package:social_media_app/services/appwrite_service.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -13,24 +13,23 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final AppwriteService appwriteService = AppwriteService();
   bool _obscureText = true;
   bool _isChecked = false;
   String email = '';
   String password = '';
   Future<void> login() async {
     try {
-      await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
+      await appwriteService.loginUser(
+        email,password
       );
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomeScreen()),
       );
-    } on FirebaseAuthException catch(e){
-    showErrorMessage(e.code);
+    } catch(e){
+    showErrorMessage(e.toString());
   }
 }
 
@@ -166,7 +165,7 @@ class _LoginState extends State<Login> {
                     fontFamily: 'Regular',
                       fontSize: 18,
                       fontWeight: FontWeight.normal,
-                    onPressed: (){}, 
+                    onPressed:login, 
                     backgroundColor: const Color(0xFF4979FF),
                     borderRadius: 50)
                  ),

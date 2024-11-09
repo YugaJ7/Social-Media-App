@@ -1,15 +1,12 @@
-import 'package:firebase_core/firebase_core.dart';
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:social_media_app/firebase_options.dart';
 import 'package:social_media_app/screens/splash_screen.dart';
-
 
 void main() async
 {
-  WidgetsFlutterBinding.ensureInitialized(); 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+    Client()
+      .setEndpoint("https://cloud.appwrite.io/v1")
+      .setProject("672cc1fd002f9dce00dd");
   return runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,

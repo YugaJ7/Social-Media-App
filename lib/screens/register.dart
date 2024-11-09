@@ -1,10 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:developer';
 import 'package:email_validator/email_validator.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:social_media_app/screens/homescreen.dart';
+import 'package:social_media_app/screens/create_profile.dart';
 import 'package:social_media_app/screens/login.dart';
 import 'package:social_media_app/screens/util.dart';
+import 'package:social_media_app/services/appwrite_service.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -16,6 +16,7 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   final formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
+  final AppwriteService appwriteService = AppwriteService();
 
 bool obscureText = true;
   String email = '';
@@ -26,26 +27,26 @@ Future <void> register() async{
   if (formKey.currentState!.validate()) {
       if (password == confirmpass) {
         try {
-          UserCredential userCredential = await FirebaseAuth.instance
-              .createUserWithEmailAndPassword(
-            email: email,
-            password: password,
+          final newUser = await appwriteService.registerUser(
+            email,
+            password,
           );
-
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(userCredential.user?.uid)
-              .set({
-            'username': username,
-            'email': email,
-          });
-
+          if (newUser != null) {
+            log('hello world');
+          await appwriteService.addUserToDatabase(
+            newUser.$id,  
+            username,
+            email,
+            password
+          );
+          await appwriteService.loginUser(email, password);
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => HomeScreen()),
+            MaterialPageRoute(builder: (context) => CreateProfile()),
           );
-        } on FirebaseAuthException catch (e) {
-          showErrorMessage(e.code);
+         }
+        } catch (e) {
+          showErrorMessage(e.toString());
         }
       } else {
         showErrorMessage("Passwords do not match.");

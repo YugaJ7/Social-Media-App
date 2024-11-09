@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:social_media_app/controller/navbar.dart';
 import 'package:social_media_app/screens/homescreen.dart';
 import 'package:social_media_app/screens/onboarding.dart';
 import 'package:social_media_app/services/appwrite_service.dart';
@@ -14,7 +15,7 @@ class AuthPage extends StatelessWidget {
         future: appwriteService.getCurrentSession(),
           builder: ((context, snapshot) {
             if (snapshot.hasData  && snapshot.data != null) {
-              return HomeScreen();
+              return Navbar();
             } else {
               return  OnboardingScreen();
             }

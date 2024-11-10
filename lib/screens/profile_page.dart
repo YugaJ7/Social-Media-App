@@ -104,11 +104,18 @@ Widget build(BuildContext context) {
             title: Text('Sign Out'),
             onTap: appwriteService.logoutUser,
           ),
-          // ListTile(
-          //   leading: Icon(Icons.delete),
-          //   title: Text('Delete Account'),
-          //   onTap: appwriteService.deleteAccount(userId),
-          // ),
+          ListTile(
+            leading: Icon(Icons.delete),
+            title: Text('Delete Account'),
+            onTap: () async {
+              final userId = await appwriteService.getCurrentUserId();
+              if (userId != null) {
+                await appwriteService.deleteAccount(userId);
+              } else {
+                print("Error: userId is null.");
+              }
+            },
+          ),
         ],
       ),
     ),

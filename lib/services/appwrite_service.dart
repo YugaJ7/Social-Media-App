@@ -5,10 +5,10 @@ import 'package:appwrite/models.dart' as models;
 import 'package:flutter/material.dart';
 
 class AppwriteService {
-  late Client client;
+  static late Client client;
   late Account account;
-  late Databases database;
-  late Storage storage;
+  static late Databases database;
+  static late Storage storage;
 
   AppwriteService() {
     client = Client();
@@ -86,7 +86,12 @@ class AppwriteService {
     //       ),
     //       TextButton(
     //         onPressed: () async {
-              await account.deleteIdentity(identityId: userId);
+              try{
+                
+                await account.deleteIdentity(identityId: userId);
+              } catch(e){
+                print("Error in deleting : $e");
+              }
     //           Navigator.of(context).pushReplacementNamed('/login');
     //         },
     //         child: Text('Delete', style: TextStyle(color: Colors.red)),
@@ -120,6 +125,10 @@ class AppwriteService {
       print('Error uploading profile image: $e');
       return null;
     }
+  }
+
+  String getImageUrl(String fileId) {
+    return 'https://cloud.appwrite.io/v1/storage/buckets/672f4201001100487dad/files/$fileId/view?project=672cc1fd002f9dce00dd';
   }
 
   // Add profile data to the database
@@ -163,7 +172,7 @@ Future<Map<String, dynamic>?> fetchUserProfile(String userId) async {
 Future<String?> getCurrentUserId() async {
     try {
       final user = await account.get();
-      return user.$id; // Returns the user's ID
+      return user.$id; 
     } catch (e) {
       print('Error retrieving current user ID: $e');
       return null;
@@ -195,9 +204,9 @@ Future<void> updateUserProfile({
 }) async {
   try {
     await database.updateDocument(
-      databaseId: '672e094b003b610078c0',  // Your database ID
-      collectionId: '672e09f40035b32645dc', // Collection ID for user profiles
-      documentId: userId,  // Same user ID to locate the document
+      databaseId: '672e094b003b610078c0',  
+      collectionId: '672e09f40035b32645dc', 
+      documentId: userId,  
       data: {
         'username': username,
         'displayName': displayName,
@@ -217,7 +226,7 @@ Future<bool> sendPasswordResetEmail(String email) async {
   try {
     await account.createRecovery(
       email: email,
-      url: 'https://localhost:3000/recovery', // Replace with your app’s reset password URL
+      url: 'https://localhost:3000/recovery', 
     );
     return true;
   } catch (e) {
@@ -226,5 +235,92 @@ Future<bool> sendPasswordResetEmail(String email) async {
   }
 }
 
+  static Future<void> uploadImage(File imageFile, String userId)async{
+    try{
+      final file = await storage.createFile(
+        bucketId: '672f4201001100487dad',
+        fileId: ID.unique(),
+        file: InputFile.fromPath(path: imageFile.path),
+      );
+      await storage.updateFile(
+          bucketId: '672f4201001100487dad',
+          fileId: ID.unique(),
+      );
+      print('File uploaded successfully');
+    } catch (e) {
+      print('Error uploading image: $e');
+    }
+  }
 
+  static Future<void> deletionImage(String fileId) async{
+    try{
+      await storage.deleteFile(
+        bucketId: '672f4201001100487dad',
+        fileId: fileId,
+      );
+      print('File deleted successfully');
+    } catch (e) {
+      print('Error deleting file: $e');
+    }
+  }
+
+  static Future<void> likeMedia(String mediaId, String userId) async{
+    try{
+      await database.createDocument(
+          databaseId: '672e094b003b610078c0',
+          collectionId: '672fbc200005547ac93d',
+          documentId: userId,
+          data: {
+            'mediaId': mediaId,
+            'userId': userId,
+            'isLiked': true,
+          }
+      );
+      print("Media liked successfully.");
+    } catch (e) {
+      print("Error liking media: $e");
+    }
+  }
+
+  static Future<void> unlikeMedia(String mediaId, String userId) async{
+    try{
+      final result = await database.listDocuments(
+        databaseId: '672e094b003b610078c0',
+        collectionId: '672fbc200005547ac93d',
+        queries: [
+          Query.equal('mediaId', mediaId),
+          Query.equal('userId', userId),
+        ],
+      );
+
+      if (result.documents.isNotEmpty) {
+        await database.deleteDocument(
+          databaseId: '672e094b003b610078c0',
+          collectionId: '672fbc200005547ac93d',
+          documentId: result.documents.first.$id,
+        );
+        print("Media unliked successfully.");
+      }
+    } catch (e) {
+      print("Error unliking media: $e");
+    }
+  }
+
+  static Future<bool> isMediaLiked(String mediaId, String userId) async {
+    try {
+      final result = await database.listDocuments(
+        databaseId: '672e094b003b610078c0',
+        collectionId: '672fbc200005547ac93d',
+        queries: [
+          Query.equal('mediaId', mediaId),
+          Query.equal('userId', userId),
+        ],
+      );
+
+      return result.documents.isNotEmpty;
+    } catch (e) {
+      print("Error checking like status: $e");
+      return false;
+    }
+  }
 }

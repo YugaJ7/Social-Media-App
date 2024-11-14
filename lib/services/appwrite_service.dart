@@ -169,6 +169,7 @@ Future<Map<String, dynamic>?> fetchUserProfile(String userId) async {
   }
 }
 
+//Getting current user id
 Future<String?> getCurrentUserId() async {
     try {
       final user = await account.get();
@@ -179,13 +180,17 @@ Future<String?> getCurrentUserId() async {
     }
   }
 
+//fetching user media 
 Future<List<String>> fetchUserMedia(String userId) async {
   try {
     final files = await storage.listFiles(
       bucketId: '672f4201001100487dad',
-      queries: [Query.equal('userId', userId)],
+      
     );
     return files.files.map((file) => file.$id).toList();
+    // return files.files.map((file) {
+    //     return storage.getFileView(bucketId: '672f4201001100487dad', fileId: file.$id).toString();
+    //   }).toList();
   } catch (e) {
     print('Error fetching media files: $e');
     return [];
@@ -222,6 +227,7 @@ Future<void> updateUserProfile({
   }
 }
 
+//sending reset password email
 Future<bool> sendPasswordResetEmail(String email) async {
   try {
     await account.createRecovery(
@@ -239,7 +245,7 @@ Future<bool> sendPasswordResetEmail(String email) async {
     try{
       final file = await storage.createFile(
         bucketId: '672f4201001100487dad',
-        fileId: ID.unique(),
+        fileId: ID.unique() + userId,
         file: InputFile.fromPath(path: imageFile.path),
       );
       await storage.updateFile(
@@ -323,4 +329,24 @@ Future<bool> sendPasswordResetEmail(String email) async {
       return false;
     }
   }
+
+// Searching user for search page
+Future<List<Map<String, dynamic>>> searchProfiles(String searchQuery) async {
+    try {
+      final result = await database.listDocuments(
+        databaseId: '672e094b003b610078c0',
+        collectionId: '672e09f40035b32645dc',
+        queries: [
+          Query.search('username', searchQuery),
+          Query.search('displayName', searchQuery),
+        ],
+      );
+      print("Documents found: ${result.documents.length}");
+      return result.documents.map((doc) => doc.data).toList();
+    } catch (e) {
+      print("Error during search: $e");
+      return [];
+    }
+  }
+
 }

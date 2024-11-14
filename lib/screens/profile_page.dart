@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:social_media_app/screens/edit_profile.dart';
+import 'package:social_media_app/screens/settings.dart';
 import 'package:social_media_app/services/appwrite_service.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -19,7 +21,8 @@ class _ProfilePageState extends State<ProfilePage> {
   String? interest;
   String? location;
   String? profileImageId;
-  List<String> mediaFiles = []; 
+  List<String> mediaFileIds = []; 
+   bool isLoading = true;
 
   @override
   void initState() {
@@ -59,12 +62,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> loadUserMedia() async {
     try {
+      setState(() {
+       isLoading = true;
+      });
       final session = await appwriteService.getCurrentSession();
       final userId = session!.userId;
 
-      final userMedia = await appwriteService.fetchUserMedia(userId);
+      mediaFileIds = await appwriteService.fetchUserMedia(userId);
       setState(() {
-        mediaFiles = userMedia;
+        mediaFileIds = mediaFileIds;
+       isLoading = false;
       });
     } catch (e) {
       print('Error loading media: $e');
@@ -74,170 +81,155 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
 Widget build(BuildContext context) {
   return Scaffold(
-    appBar: AppBar(
-      backgroundColor: Colors.white,
-      title: Text(username ?? 'Profile'),
-      actions: [
-        Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openEndDrawer();
-            },
-          ),
-        ),
-      ],
-    ),
-    endDrawer: Drawer(
+    backgroundColor: Colors.white,
+    body: SafeArea(
       child: ListView(
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.all(16),
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: Colors.white),
-            child: Text(
-              'Menu',
-              style: TextStyle(color: Colors.white, fontSize: 24),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(username ?? 'Username', style: const TextStyle(color: Colors.black, fontSize: 24),),
+                  IconButton(
+                    onPressed: (){
+                      Navigator.push(context,MaterialPageRoute(builder: (context)=> Settings_page()));
+                      }, 
+                    icon: const Icon(FontAwesomeIcons.gear, color: Colors.black54,))
+                ],
+              ),
+              const SizedBox(height: 10,),
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 65,
+                    backgroundImage: NetworkImage(
+                      'https://cloud.appwrite.io/v1/storage/buckets/672f4201001100487dad/files/$profileImageId/view?project=672cc1fd002f9dce00dd',
+                    ),
+                    backgroundColor: Colors.grey[200],
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    children: [
+                      Text(
+                        displayName ?? '',
+                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500, fontFamily: 'Regular'),
+                      ),
+                      const SizedBox(height: 8),
+                      const Row(
+                        children: [
+                          Text(
+                            '11 Followers',
+                            style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
+                          ),
+                          Text(' • ', style: TextStyle(color: Colors.grey)),
+                          Text(
+                            '2 Following',
+                            style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        location ?? '',
+                        style: const TextStyle(color: Colors.grey, fontSize: 16),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(bio ?? '', style: const TextStyle(fontSize: 16)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditProfilePage(
+                    userId: userId,
+                    username: username,
+                    displayName: displayName,
+                    bio: bio,
+                    interest: interest,
+                    location: location,
+                  ),
+                ),
+              );
+            },
+            child: const Text('Edit Profile', style: TextStyle(color: Colors.black)),
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
             ),
           ),
-          ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Sign Out'),
-            onTap: appwriteService.logoutUser,
-          ),
-          ListTile(
-            leading: Icon(Icons.delete),
-            title: Text('Delete Account'),
-            onTap: () async {
-              final userId = await appwriteService.getCurrentUserId();
-              if (userId != null) {
-                await appwriteService.deleteAccount(userId);
-              } else {
-                print("Error: userId is null.");
-              }
-            },
-          ),
-        ],
-      ),
-    ),
-    backgroundColor: Colors.white,
-    body: ListView(
-      padding: EdgeInsets.all(16),
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+          // TabBar for Feeds and  Media
+          DefaultTabController(
+            length: 2,
+            child: Column(
               children: [
-                CircleAvatar(
-                  radius: 65,
-                  backgroundImage: NetworkImage(
-                    'https://cloud.appwrite.io/v1/storage/buckets/672f4201001100487dad/files/$profileImageId/view?project=672cc1fd002f9dce00dd',
-                  ),
-                  backgroundColor: Colors.grey[200],
-                ),
-                SizedBox(width: 16),
-                Column(
-                  children: [
-                    Text(
-                      displayName ?? '',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Text(
-                          '11 Followers',
-                          style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
-                        ),
-                        Text(' • ', style: TextStyle(color: Colors.grey)),
-                        Text(
-                          '2 Following',
-                          style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      location ?? '',
-                      style: TextStyle(color: Colors.grey, fontSize: 16),
-                    )
+                const TabBar(
+                  labelColor: Colors.black,
+                  indicatorColor: Colors.black,
+                  tabs: [
+                    Tab(text: 'Posts'),
+                    Tab(text: 'Media'),
                   ],
+                ),
+                SizedBox(
+                  height: 400,
+                  child: TabBarView(
+                    children: [
+                      const Center(child: Text('Feeds Content')),
+                      // Media tab to display user images
+                      isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : mediaFileIds.isEmpty
+                ? const Center(child: Text("No media files found"))
+                : GridView.builder(
+                    padding: const EdgeInsets.all(8.0),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2, // Adjust the number of columns as needed
+                      crossAxisSpacing: 8.0,
+                      mainAxisSpacing: 8.0,
+                    ),
+                    itemCount: mediaFileIds.length,
+                    itemBuilder: (context, index) {
+                      // For demonstration, showing the file ID
+                      // Replace this with an image widget or another media display widget
+                      String x =mediaFileIds[index];
+                      print('IMAGE : '+ x);
+                      return Container(
+                        
+                        color: Colors.grey[300],
+                        child: Center(
+                          child: 
+                            Image.network(
+                            //'https://cloud.appwrite.io/v1/storage/buckets/672f4201001100487dad/files/672f55262be8cc41c16d/view?project=672cc1fd002f9dce00dd',
+                            'https://cloud.appwrite.io/v1/storage/buckets/672f4201001100487dad/files/$x/view?project=672cc1fd002f9dce00dd',
+                            //mediaFileIds[index],
+                            fit: BoxFit.cover,
+                          ),
+                            
+                            
+                        ),
+                      );
+                    },
+                  ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            SizedBox(height: 10),
-            Text(bio ?? '', style: TextStyle(fontSize: 16)),
-          ],
-        ),
-        SizedBox(height: 8),
-        OutlinedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => EditProfilePage(
-                  userId: userId,
-                  username: username,
-                  displayName: displayName,
-                  bio: bio,
-                  interest: interest,
-                  location: location,
-                ),
-              ),
-            );
-          },
-          child: Text('Edit Profile', style: TextStyle(color: Colors.black)),
-          style: OutlinedButton.styleFrom(
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
           ),
-        ),
-        // TabBar for Feeds, Community, Media
-        DefaultTabController(
-          length: 3,
-          child: Column(
-            children: [
-              TabBar(
-                labelColor: Colors.black,
-                indicatorColor: Colors.black,
-                tabs: [
-                  Tab(text: 'Feeds'),
-                  Tab(text: 'Community'),
-                  Tab(text: 'Media'),
-                ],
-              ),
-              SizedBox(
-                height: 400,
-                child: TabBarView(
-                  children: [
-                    Center(child: Text('Feeds Content')),
-                    Center(child: Text('Community Content')),
-                    // Media tab to display user images
-                    GridView.builder(
-                      padding: EdgeInsets.all(8),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 8,
-                      ),
-                      itemCount: mediaFiles.length,
-                      itemBuilder: (context, index) {
-                        final mediaFileId = mediaFiles[index];
-                        return Image.network(
-                          'https://cloud.appwrite.io/v1/storage/buckets/672f4201001100487dad/files/672f55262be8cc41c16d/view?project=672cc1fd002f9dce00dd',
-                          fit: BoxFit.cover,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }}

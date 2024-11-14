@@ -170,6 +170,7 @@ class _CreateProfileState extends State<CreateProfile> {
                               borderSide: BorderSide.none,
                             ),
                         ),
+                      maxLines: 3,
                     ),
                   SizedBox(height: 16),
                   Text(

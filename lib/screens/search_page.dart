@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:social_media_app/screens/guests_profile.dart';
 import 'package:social_media_app/services/appwrite_service.dart';
 
 class SearchPage extends StatefulWidget {
@@ -11,7 +12,7 @@ class _SearchPageState extends State<SearchPage> {
   final TextEditingController search = TextEditingController();
   List<Map<String, dynamic>> result= [];
 
-  void _performSearch(String query) async {
+  void performSearch(String query) async {
     if (query.isNotEmpty) {
       try {
         final results = await AppwriteService().searchProfiles(query);
@@ -53,7 +54,7 @@ class _SearchPageState extends State<SearchPage> {
                       ),
                     ),
                 onChanged: (value) {
-                  _performSearch(value);
+                  performSearch(value);
                 },
               ),
               SizedBox(height: 20),
@@ -64,17 +65,23 @@ class _SearchPageState extends State<SearchPage> {
                         itemCount: result.length,
                         itemBuilder: (context, index) {
                           final profile = result[index];
-                          return ListTile(
-                            title: Text(profile['displayName'] ?? 'No Display Name'),
-                            subtitle: Text(profile['username'] ?? 'No Username'),
-                            leading: profile['profileImageId'] != null
-                                ? Image.network(
-                                    AppwriteService().getImageUrl(profile['profileImageId']),
-                                    width: 40,
-                                    height: 40,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Icon(Icons.account_circle, size: 40),
+                          return GestureDetector(
+                            onTap: (){
+                              Navigator.push(context,MaterialPageRoute(builder: (context) => GuestsProfile(profile: profile),),);
+                            },
+                            child: ListTile(
+                              title: Text(profile['displayName'] ?? 'No Display Name'),
+                              subtitle: Text(profile['username'] ?? 'No Username'),
+                              leading: CircleAvatar(
+                                radius: 30,
+                                backgroundImage: profile['profileImageId'] != null
+                                  ? NetworkImage(
+                                      AppwriteService().getImageUrl(profile['profileImageId']),
+                                    )
+                                  : null,
+                                backgroundColor: Colors.grey,
+                              )
+                            ),
                           );
                         },
                       ),

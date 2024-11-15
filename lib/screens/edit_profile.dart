@@ -113,7 +113,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 ? NetworkImage(
                                     appwriteService.getImageUrl(widget.profileImageId!),
                                   )
-                                : AssetImage('assets/default_profile.png')) as ImageProvider,
+                                : null ) ,
                         child: _selectedImage == null ? Icon(Icons.camera_alt,size: 70,color: const Color.fromARGB(255, 123, 123, 123)) : null,
                       ),
                     ),

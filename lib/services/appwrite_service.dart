@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'dart:math';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:flutter/material.dart';
@@ -72,34 +72,13 @@ class AppwriteService {
       print("Logout error: $e");
     }
   }
-  Future<void> deleteAccount(String userId) async {
-    // Implement delete account functionality with a confirmation dialog
-    // showDialog(
-    //   context: context,
-    //   builder: (context) => AlertDialog(
-    //     title: Text('Delete Account'),
-    //     content: Text('Are you sure you want to delete your account? This action cannot be undone.'),
-    //     actions: [
-    //       TextButton(
-    //         onPressed: () => Navigator.of(context).pop(),
-    //         child: Text('Cancel'),
-    //       ),
-    //       TextButton(
-    //         onPressed: () async {
-              try{
-                
-                await account.deleteIdentity(identityId: userId);
-              } catch(e){
-                print("Error in deleting : $e");
-              }
-    //           Navigator.of(context).pushReplacementNamed('/login');
-    //         },
-    //         child: Text('Delete', style: TextStyle(color: Colors.red)),
-    //       ),
-    //     ],
-    //   ),
-    // );
+  Future<void> deleteAccount(String id) async {
+  try {
+    await account.deleteIdentity(identityId: id); 
+  } catch (e) {
+    print('Error in deleting account: $e');
   }
+}
 
 
   // Check if there’s an active user session
@@ -187,10 +166,9 @@ Future<List<String>> fetchUserMedia(String userId) async {
       bucketId: '672f4201001100487dad',
       
     );
-    return files.files.map((file) => file.$id).toList();
-    // return files.files.map((file) {
-    //     return storage.getFileView(bucketId: '672f4201001100487dad', fileId: file.$id).toString();
-    //   }).toList();
+    //return files.files.map((file) => file.$id).toList();
+    final filteredFiles = files.files.where((file) => file.$id.endsWith(userId)).toList();
+    return filteredFiles.map((file) => file.$id).toList();
   } catch (e) {
     print('Error fetching media files: $e');
     return [];
@@ -243,14 +221,14 @@ Future<bool> sendPasswordResetEmail(String email) async {
 
   static Future<void> uploadImage(File imageFile, String userId)async{
     try{
-      final file = await storage.createFile(
+      const String chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      final Random random = Random();
+      final String shortUniqueId = List.generate(5, (index) => chars[random.nextInt(chars.length)]).join();
+      final String uniqueFileId = '${shortUniqueId}_$userId';
+      await storage.createFile(
         bucketId: '672f4201001100487dad',
-        fileId: ID.unique() + userId,
+        fileId: uniqueFileId,
         file: InputFile.fromPath(path: imageFile.path),
-      );
-      await storage.updateFile(
-          bucketId: '672f4201001100487dad',
-          fileId: ID.unique(),
       );
       print('File uploaded successfully');
     } catch (e) {

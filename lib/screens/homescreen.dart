@@ -17,7 +17,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
 
   List<String> imageFileIds = [];
-  int _selectedIndex = 0;
   String imagePath = "";
   String? userId;
 
@@ -65,7 +64,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
     });
   }
 

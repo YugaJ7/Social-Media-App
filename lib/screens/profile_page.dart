@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:social_media_app/screens/edit_profile.dart';
@@ -49,8 +48,8 @@ class _ProfilePageState extends State<ProfilePage> {
           print(profileImageId);
           print('HELLO');
           if (profileImageId != null) {
-          String imageUrl = 'https://cloud.appwrite.io/v1/storage/buckets/672f55262be8cc41c16d/files/$profileImageId/view?project=672cc1fd002f9dce00dd';
-          print('Image URL: $imageUrl');
+          String url = 'https://cloud.appwrite.io/v1/storage/buckets/672f55262be8cc41c16d/files/$profileImageId/view?project=672cc1fd002f9dce00dd';
+          print('Image URL: $url');
           print('HELLO');
         }
         });
@@ -77,6 +76,82 @@ class _ProfilePageState extends State<ProfilePage> {
       print('Error loading media: $e');
     }
   }
+  void showmedia({required String url, required String fileid}) {
+  showDialog(
+    context: context, 
+    builder: (context) => Dialog(
+      backgroundColor: Colors.white.withOpacity(0),
+      child: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: MediaQuery.of(context).size.height*0.05,),
+            Align(
+              alignment: Alignment.topRight,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                onPressed: () {
+                  Navigator.pop(context); 
+                },
+              ),
+            ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                url,
+                fit: BoxFit.contain,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red, size: 40),
+              onPressed: () async => {
+                await AppwriteService.deletionImage(fileid),
+                Navigator.pop(context)
+              },
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+void show_profile_image({required String url}) {
+  showDialog(
+    context: context, 
+    builder: (context) => Dialog(
+      backgroundColor: Colors.white.withOpacity(0),
+      child: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: MediaQuery.of(context).size.height*0.05,),
+            Align(
+              alignment: Alignment.topRight,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                onPressed: () {
+                  Navigator.pop(context); 
+                },
+              ),
+            ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                url,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 
   @override
 Widget build(BuildContext context) {
@@ -103,12 +178,17 @@ Widget build(BuildContext context) {
               const SizedBox(height: 10,),
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 65,
-                    backgroundImage: NetworkImage(
-                      'https://cloud.appwrite.io/v1/storage/buckets/672f4201001100487dad/files/$profileImageId/view?project=672cc1fd002f9dce00dd',
+                  GestureDetector(
+                    onTap: (){
+                      show_profile_image(url: appwriteService.getImageUrl(profileImageId!));
+                    },
+                    child: CircleAvatar(
+                      radius: 65,
+                      backgroundImage: NetworkImage(
+                        'https://cloud.appwrite.io/v1/storage/buckets/672f4201001100487dad/files/$profileImageId/view?project=672cc1fd002f9dce00dd',
+                      ),
+                      backgroundColor: Colors.grey[200],
                     ),
-                    backgroundColor: Colors.grey[200],
                   ),
                   const SizedBox(width: 16),
                   Column(
@@ -187,44 +267,38 @@ Widget build(BuildContext context) {
                   child: TabBarView(
                     children: [
                       const Center(child: Text('Feeds Content')),
-                      // Media tab to display user images
                       isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : mediaFileIds.isEmpty
-                ? const Center(child: Text("No media files found"))
-                : GridView.builder(
-                    padding: const EdgeInsets.all(8.0),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // Adjust the number of columns as needed
-                      crossAxisSpacing: 8.0,
-                      mainAxisSpacing: 8.0,
-                    ),
-                    itemCount: mediaFileIds.length,
-                    itemBuilder: (context, index) {
-                      // For demonstration, showing the file ID
-                      // Replace this with an image widget or another media display widget
-                      String x =mediaFileIds[index];
-                      print('IMAGE : '+ x);
-                      return Container(
-                        
-                        color: Colors.grey[300],
-                        child: Center(
-                          child: 
-                            Image.network(
-                            //'https://cloud.appwrite.io/v1/storage/buckets/672f4201001100487dad/files/672f55262be8cc41c16d/view?project=672cc1fd002f9dce00dd',
-                            'https://cloud.appwrite.io/v1/storage/buckets/672f4201001100487dad/files/$x/view?project=672cc1fd002f9dce00dd',
-                            //mediaFileIds[index],
-                            fit: BoxFit.cover,
-                          ),
-                            
-                            
+                        ? const Center(child: CircularProgressIndicator())
+                        : mediaFileIds.isEmpty
+                            ? const Center(child: Text("No media files found"))
+                            : GridView.builder(
+                                padding: const EdgeInsets.symmetric(vertical :8.0),
+                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3, 
+                                  crossAxisSpacing: 5.0,
+                                  mainAxisSpacing: 5.0,
+                                ),
+                                itemCount: mediaFileIds.length,
+                                itemBuilder: (context, index) {
+                                  String x =mediaFileIds[index];
+                                  String url = appwriteService.getImageUrl(x);
+                                  print('IMAGE : '+ x);
+                                  return GestureDetector(
+                                    onTap: () {
+                                      showmedia(url: url, fileid: x);
+                                     },   
+                                  child:  Container(
+                                    color: Colors.grey[300],
+                                    child: Image.network(
+                                      url,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ));
+                                },
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                  ),
-                    ],
-                  ),
-                ),
+                      ),
               ],
             ),
           ),
@@ -232,4 +306,5 @@ Widget build(BuildContext context) {
       ),
     ),
   );
-}}
+}
+}

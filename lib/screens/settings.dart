@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:social_media_app/screens/login.dart';
 import 'package:social_media_app/screens/util.dart';
 import 'package:social_media_app/services/appwrite_service.dart';
 
@@ -72,9 +73,16 @@ class _Settings_pageState extends State<Settings_page> {
                                 child: Text('Cancel',style: TextStyle(color: Colors.black),),
                               ),
                               TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
+                                onPressed: () async {                           
+                                    String? id = await appwriteService.getCurrentUserId();
+                                    await appwriteService.deleteAccount(id!); 
+                                    print('User account deleted successfully');
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => Login()),
+                                      (route) => false, 
+                                    );
+                                }, 
                                 child: Text('Delete', style: TextStyle(color: Colors.red)),
                               ),
                             ],
@@ -116,9 +124,22 @@ class _Settings_pageState extends State<Settings_page> {
                     fontFamily: 'Regular', 
                     fontSize: 18, 
                     fontWeight: FontWeight.normal, 
-                    onPressed: appwriteService.logoutUser, 
+                    onPressed: () async {
+                      try {
+                        await appwriteService.logoutUser(); 
+                        print('User logged out successfully');
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => Login()),
+                          (route) => false, 
+                        );
+                      } catch (e) {
+                        print('Logout error: $e');
+                      }
+                    }, 
                     backgroundColor: Colors.black, 
-                    borderRadius: 30),
+                    borderRadius: 30,
+                    ),
                 ),
               )
             ],

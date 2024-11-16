@@ -3,12 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:social_media_app/screens/postcreation.dart';
 import 'package:social_media_app/services/appwrite_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:appwrite/appwrite.dart';
+import 'package:social_media_app/screens/postcreation.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -19,21 +21,13 @@ class _HomeScreenState extends State<HomeScreen> {
   List<String> imageFileIds = [];
   String imagePath = "";
   String? userId;
+  List<File> uploadedImages = [];
 
   @override
   void initState() {
     super.initState();
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        systemNavigationBarColor: Colors.white,
-        statusBarColor: Colors.white,
-        statusBarIconBrightness: Brightness.dark,
-        systemNavigationBarIconBrightness: Brightness.dark,
-      ),
-    );
     _getCurrentUser();
-
-
+    _fetchImage();
   }
 
 
@@ -49,17 +43,36 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-
-  Future<void> deleteImage(String fileId) async {
-    try{
-      await AppwriteService.deletionImage(fileId);
-      setState(() {
-        imageFileIds.remove(fileId); // Remove from the list after deletion
-      });
-    } catch (e) {
-      print('Failed to delete image: $e');
+  Future<void> _fetchImage() async {
+    if(userId!= null) {
+      try {
+        final fetchedFields = await AppwriteService.getUploadedImages(userId!);
+        setState(() {
+          imageFileIds = fetchedFields;
+        });
+        for (var fileId in imageFileIds) {
+          final imageFile = await AppwriteService.getImageFile(fileId);
+          setState(() {
+            uploadedImages.add(imageFile);
+          });
+        }
+      } catch (e) {
+        print("Error getting current user: $e");
+      }
     }
   }
+
+
+  // Future<void> deleteImage(String fileId) async {
+  //   try{
+  //     await AppwriteService.deletionImage(fileId);
+  //     setState(() {
+  //       imageFileIds.remove(fileId); // Remove from the list after deletion
+  //     });
+  //   } catch (e) {
+  //     print('Failed to delete image: $e');
+  //   }
+  // }
 
 
   void _onItemTapped(int index) {
@@ -68,25 +81,25 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
-  Future<void> _pickAndUploadImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        imagePath = image.path;
-      });
-      File file = File(imagePath);
-      if (userId != null) {
-        try {
-          await AppwriteService.uploadImage(file, userId!);
-        } catch (e) {
-          print("Error uploading image: $e");
-        }
-      } else {
-        print("User ID is null, cannot upload image.");
-      }
-    }
-  }
+  // Future<void> _pickAndUploadImage() async {
+  //   final ImagePicker picker = ImagePicker();
+  //   final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+  //   if (image != null) {
+  //     setState(() {
+  //       imagePath = image.path;
+  //     });
+  //     File file = File(imagePath);
+  //     if (userId != null) {
+  //       try {
+  //         await AppwriteService.uploadImage(file, userId!);
+  //       } catch (e) {
+  //         print("Error uploading image: $e");
+  //       }
+  //     } else {
+  //       print("User ID is null, cannot upload image.");
+  //     }
+  //   }
+  // }
 
 
 
@@ -140,7 +153,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: _pickAndUploadImage,
+          onPressed: (){
+            Navigator.push(context, MaterialPageRoute(builder: (context) => PostCreation()));
+          },
           backgroundColor: Colors.black,
           shape: const CircleBorder(),
           child: const Icon(

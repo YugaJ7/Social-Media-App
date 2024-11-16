@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:social_media_app/screens/guests_profile.dart';
 import 'package:social_media_app/services/appwrite_service.dart';
+import 'package:social_media_app/services/search_history_service.dart';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -9,8 +10,16 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
+  final SearchHistoryService _history = SearchHistoryService();
   final TextEditingController search = TextEditingController();
-  List<Map<String, dynamic>> result= [];
+  List<String> result = [];
+  List<String> recentSearches = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadRecentSearches();
+  }
 
   void performSearch(String query) async {
     if (query.isNotEmpty) {
@@ -19,6 +28,8 @@ class _SearchPageState extends State<SearchPage> {
         setState(() {
           result= results;
         });
+        await _history.addSearchTerm(query);
+        loadRecentSearches();
       } catch (e) {
         print('Error during search: $e');
       }
@@ -27,6 +38,17 @@ class _SearchPageState extends State<SearchPage> {
         result= [];
       });
     }
+  }
+
+  Future<void> loadRecentSearches() async {
+    final history = await _history.getSearchHistory();
+    setState(() {
+      recentSearches = history;
+    });
+  }
+  void clearSearchHistory() async {
+    await _history.clearSearchHistory();
+    loadRecentSearches();
   }
 
   @override
@@ -53,40 +75,107 @@ class _SearchPageState extends State<SearchPage> {
                         borderSide: BorderSide.none,
                       ),
                     ),
-                onChanged: (value) {
+                onSubmitted: (value) {
                   performSearch(value);
                 },
               ),
-              SizedBox(height: 20),
-             Expanded(
+              SizedBox(height: 10),
+              Expanded(
                 child: result.isEmpty
-                    ? Center(child: Text("No results found"))
+                    ? recentSearches.isEmpty
+                        ? const Center(child: Text(""))
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      "Recent Searches",
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                                    ),
+                                    TextButton(
+                                      child: const Text(
+                                        "Clear",
+                                        style: TextStyle(color: Colors.blueAccent),),
+                                      onPressed: clearSearchHistory,
+                                    ),
+                                  ],
+                                )
+                              ),
+                              Expanded(
+                                child: ListView.builder(
+                                  itemCount: recentSearches.length,
+                                  itemBuilder: (context, index) {
+                                    final searchTerm = recentSearches[index];
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              searchTerm,
+                                              style: const TextStyle(fontSize: 16),
+                                              overflow: TextOverflow.ellipsis, 
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.close),
+                                            onPressed: () async {
+                                              await _history.removeSearchTerm(searchTerm);
+                                              loadRecentSearches(); 
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          )
                     : ListView.builder(
                         itemCount: result.length,
                         itemBuilder: (context, index) {
-                          final profile = result[index];
-                          return GestureDetector(
-                            onTap: (){
-                              Navigator.push(context,MaterialPageRoute(builder: (context) => GuestsProfile(profile: profile),),);
+                          final id = result[index];
+
+                          return FutureBuilder<Map<String, dynamic>?>(
+                            future: AppwriteService().fetchUserProfileById(id),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const ListTile(
+                                  leading: CircularProgressIndicator(color: Colors.grey,),
+                                  title: Text("Searching..."),
+                                );
+                              }
+                              final profile = snapshot.data!;
+                              return GestureDetector(
+                                onTap: (){
+                                  Navigator.push(context,MaterialPageRoute(builder: (context) => GuestsProfile(profile: profile),),);
+                                },
+                                child: ListTile(
+                                  title: Text(profile['displayName'] ?? 'No Display Name'),
+                                  subtitle: Text(profile['username'] ?? 'No Username'),
+                                  leading: CircleAvatar(
+                                    radius: 30,
+                                    backgroundImage: profile['profileImageId'] != null
+                                      ? NetworkImage(
+                                          AppwriteService().getImageUrl(profile['profileImageId']),
+                                        )
+                                      : null,
+                                    backgroundColor: Colors.grey,
+                                  )
+                                ),
+                              );
                             },
-                            child: ListTile(
-                              title: Text(profile['displayName'] ?? 'No Display Name'),
-                              subtitle: Text(profile['username'] ?? 'No Username'),
-                              leading: CircleAvatar(
-                                radius: 30,
-                                backgroundImage: profile['profileImageId'] != null
-                                  ? NetworkImage(
-                                      AppwriteService().getImageUrl(profile['profileImageId']),
-                                    )
-                                  : null,
-                                backgroundColor: Colors.grey,
-                              )
-                            ),
                           );
                         },
                       ),
-              ),
-            ],
+                )
+              ],
           ),
         ),
       ),

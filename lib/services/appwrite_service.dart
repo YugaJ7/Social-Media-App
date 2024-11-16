@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:math';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
-import 'package:flutter/material.dart';
 
 class AppwriteService {
   static late Client client;
@@ -309,22 +308,56 @@ Future<bool> sendPasswordResetEmail(String email) async {
   }
 
 // Searching user for search page
-Future<List<Map<String, dynamic>>> searchProfiles(String searchQuery) async {
-    try {
-      final result = await database.listDocuments(
-        databaseId: '672e094b003b610078c0',
-        collectionId: '672e09f40035b32645dc',
-        queries: [
-          Query.search('username', searchQuery),
-          Query.search('displayName', searchQuery),
-        ],
-      );
-      print("Documents found: ${result.documents.length}");
-      return result.documents.map((doc) => doc.data).toList();
-    } catch (e) {
-      print("Error during search: $e");
-      return [];
-    }
+// Future<List<Map<String, dynamic>>> searchProfiles(String searchQuery) async {
+//     try {
+//       final result = await database.listDocuments(
+//         databaseId: '672e094b003b610078c0',
+//         collectionId: '672e09f40035b32645dc',
+//         queries: [
+//           Query.search('username', searchQuery),
+//           Query.search('displayName', searchQuery),
+//         ],
+//       );
+//       print("Documents found: ${result.documents.length}");
+//       return result.documents.map((doc) => doc.data).toList();
+//     } catch (e) {
+//       print("Error during search: $e");
+//       return [];
+//     }
+//   }
+
+Future<List<String>> searchProfiles(String searchQuery) async {
+  try {
+    final result = await database.listDocuments(
+      databaseId: '672e094b003b610078c0',
+      collectionId: '672e09f40035b32645dc',
+      queries: [
+        Query.search('username', searchQuery),
+        Query.search('displayName', searchQuery),
+      ],
+    );
+    return result.documents.map((doc) => doc.$id).toList();
+  } catch (e) {
+    print("Error during search: $e");
+    return [];
   }
+}
+
+//Fetch document data using document id
+Future<Map<String, dynamic>?> fetchUserProfileById(String documentId) async {
+  try {
+    final document = await database.getDocument(
+      databaseId: '672e094b003b610078c0',
+      collectionId: '672e09f40035b32645dc',
+      documentId: documentId,
+    );
+
+    return document.data;
+  } catch (e) {
+    print("Error fetching user profile by ID: $e");
+    return null;
+  }
+}
+
 
 }

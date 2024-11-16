@@ -18,7 +18,6 @@ class _NavbarState extends State<Navbar> {
     final List<Widget> _pages = [
     HomeScreen(),
     SearchPage(),
-    MessagePage(),
     ProfilePage(),
   ];
 
@@ -45,10 +44,6 @@ class _NavbarState extends State<Navbar> {
           BottomNavigationBarItem(
             icon: Icon(FontAwesomeIcons.magnifyingGlass),
             label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.message),
-            label: 'Message',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

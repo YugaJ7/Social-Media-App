@@ -17,7 +17,6 @@ class _LoginState extends State<Login> {
   final TextEditingController _resetController = TextEditingController();
   final AppwriteService appwriteService = AppwriteService();
   bool _obscureText = true;
-  bool _isChecked = false;
   String email = '';
   String password = '';
   Future<void> login() async {
@@ -134,20 +133,6 @@ class _LoginState extends State<Login> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Checkbox(
-                        value: _isChecked,
-                        onChanged: (value) {
-                          setState(() {
-                            _isChecked = value!;
-                          });
-                        },
-                        activeColor: Color(0xFF4979FF),
-                      ),
-                        Text("Remember me"),
-                      ],
-                    ),
                     TextButton(
                       onPressed: () {
                         showDialog(

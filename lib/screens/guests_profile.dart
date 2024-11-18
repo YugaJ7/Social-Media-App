@@ -91,7 +91,7 @@ class _GuestsProfileState extends State<GuestsProfile> {
                         backgroundColor: Colors.grey[200],
                       ),
                     ),
-                    SizedBox(width: MediaQuery.of(context).size.width*0.1),
+                    SizedBox(width: MediaQuery.of(context).size.width*0.15),
                     Column(
                       children: [
                         Text(

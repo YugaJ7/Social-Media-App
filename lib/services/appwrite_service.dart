@@ -135,8 +135,8 @@ class AppwriteService {
 Future<Map<String, dynamic>?> fetchUserProfile(String userId) async {
   try {
     final document = await database.getDocument(
-      databaseId: '672e094b003b610078c0',  // Your database ID
-      collectionId: '672e09f40035b32645dc', // Your collection ID for user profiles
+      databaseId: '672e094b003b610078c0',  
+      collectionId: '672e09f40035b32645dc', 
       documentId: userId,
     );
 
@@ -165,7 +165,6 @@ Future<List<String>> fetchUserMedia(String userId) async {
       bucketId: '672f4201001100487dad',
       
     );
-    //return files.files.map((file) => file.$id).toList();
     final filteredFiles = files.files.where((file) => file.$id.endsWith(userId)).toList();
     return filteredFiles.map((file) => file.$id).toList();
   } catch (e) {
@@ -213,7 +212,6 @@ Future<bool> sendPasswordResetEmail(String email) async {
     );
     return true;
   } catch (e) {
-    //throw 'Error sending reset email: $e';
     return false;
   }
 }
@@ -308,24 +306,6 @@ Future<bool> sendPasswordResetEmail(String email) async {
   }
 
 // Searching user for search page
-// Future<List<Map<String, dynamic>>> searchProfiles(String searchQuery) async {
-//     try {
-//       final result = await database.listDocuments(
-//         databaseId: '672e094b003b610078c0',
-//         collectionId: '672e09f40035b32645dc',
-//         queries: [
-//           Query.search('username', searchQuery),
-//           Query.search('displayName', searchQuery),
-//         ],
-//       );
-//       print("Documents found: ${result.documents.length}");
-//       return result.documents.map((doc) => doc.data).toList();
-//     } catch (e) {
-//       print("Error during search: $e");
-//       return [];
-//     }
-//   }
-
 Future<List<String>> searchProfiles(String searchQuery) async {
   try {
     final result = await database.listDocuments(
@@ -336,7 +316,9 @@ Future<List<String>> searchProfiles(String searchQuery) async {
         Query.search('displayName', searchQuery),
       ],
     );
-    return result.documents.map((doc) => doc.$id).toList();
+    final currentUserId = await getCurrentUserId();
+    return result.documents.where((doc) => doc.$id != currentUserId).map((doc) => doc.$id).toList();
+
   } catch (e) {
     print("Error during search: $e");
     return [];

@@ -190,7 +190,7 @@ Widget build(BuildContext context) {
                       backgroundColor: Colors.grey[200],
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 30),
                   Column(
                     children: [
                       Text(
@@ -201,12 +201,12 @@ Widget build(BuildContext context) {
                       const Row(
                         children: [
                           Text(
-                            '11 Followers',
+                            '0 Followers',
                             style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
                           ),
                           Text(' • ', style: TextStyle(color: Colors.grey)),
                           Text(
-                            '2 Following',
+                            '0 Following',
                             style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
                           ),
                         ],

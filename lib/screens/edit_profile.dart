@@ -30,49 +30,49 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final AppwriteService appwriteService = AppwriteService();
-  final _formKey = GlobalKey<FormState>();
+  final form = GlobalKey<FormState>();
 
-  late TextEditingController _usernameController;
-  late TextEditingController _displayNameController;
-  late TextEditingController _bioController;
-  late TextEditingController _interestController;
-  late TextEditingController _locationController;
-  File? _selectedImage;
+  late TextEditingController user;
+  late TextEditingController displayName;
+  late TextEditingController bio;
+  late TextEditingController interest;
+  late TextEditingController location;
+  File? image;
 
   @override
   void initState() {
     super.initState();
-    _usernameController = TextEditingController(text: widget.username);
-    _displayNameController = TextEditingController(text: widget.displayName);
-    _bioController = TextEditingController(text: widget.bio);
-    _interestController = TextEditingController(text: widget.interest);
-    _locationController = TextEditingController(text: widget.location);
+    user = TextEditingController(text: widget.username);
+    displayName = TextEditingController(text: widget.displayName);
+    bio = TextEditingController(text: widget.bio);
+    interest = TextEditingController(text: widget.interest);
+    location = TextEditingController(text: widget.location);
   }
 
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        image = File(pickedFile.path);
       });
     }
   }
 
   Future<void> _updateProfile() async {
-    if (_formKey.currentState!.validate()) {
+    if (form.currentState!.validate()) {
       String? profileImageId = widget.profileImageId;
-      if (_selectedImage != null) {
-        profileImageId = await appwriteService.uploadProfileImage(widget.userId!, _selectedImage!);
+      if (image != null) {
+        profileImageId = await appwriteService.uploadProfileImage(widget.userId!, image!);
       }
 
       try {
         await appwriteService.updateUserProfile(
           userId: widget.userId!,
-          username: _usernameController.text,
-          displayName: _displayNameController.text,
-          bio: _bioController.text,
-          interest: _interestController.text,
-          location: _locationController.text,
+          username: user.text,
+          displayName: displayName.text,
+          bio: bio.text,
+          interest: interest.text,
+          location: location.text,
           profileImageId: profileImageId,
         );
         Navigator.pop(context);
@@ -96,7 +96,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Form(
-              key: _formKey,
+              key: form,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -107,14 +107,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       child: CircleAvatar(
                         radius: 70,
                         backgroundColor: Color(0xFFEFF0F2),
-                        backgroundImage: _selectedImage != null
-                            ? FileImage(_selectedImage!)
+                        backgroundImage: image != null
+                            ? FileImage(image!)
                             : (widget.profileImageId != null
                                 ? NetworkImage(
                                     appwriteService.getImageUrl(widget.profileImageId!),
                                   )
                                 : null ) ,
-                        child: _selectedImage == null ? Icon(Icons.camera_alt,size: 70,color: const Color.fromARGB(255, 123, 123, 123)) : null,
+                        child: image == null ? Icon(Icons.camera_alt,size: 70,color: const Color.fromARGB(255, 123, 123, 123)) : null,
                       ),
                     ),
                   ),
@@ -124,7 +124,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 150, 149, 149)),
                   ),
                   TextFormField(
-                    controller: _usernameController,
+                    controller: user,
                     validator: (value) => value!.isEmpty ? 'Please enter a username' : null,
                     style: const TextStyle(color: Colors.black),
                     decoration: InputDecoration(
@@ -144,7 +144,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     style: TextStyle(fontSize: 16,color: Color.fromARGB(255, 150, 149, 149)),
                   ),
                   TextFormField(
-                      controller: _displayNameController,
+                      controller: displayName,
                       validator: (value) => value!.isEmpty ? 'Please enter a display name' : null,
                       style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
@@ -164,7 +164,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     style: TextStyle(fontSize: 16,color: Color.fromARGB(255, 150, 149, 149)),
                   ),
                   TextFormField(
-                      controller: _bioController,
+                      controller: bio,
                       validator: (value) => value!.isEmpty ? 'Please enter a bio' : null,
                       style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
@@ -184,7 +184,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     style: TextStyle(fontSize: 16,color: Color.fromARGB(255, 150, 149, 149)),
                   ),
                   TextFormField(
-                      controller: _interestController,
+                      controller: interest,
                       validator: (value) => value!.isEmpty ? 'Please enter a interest' : null,
                       style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
@@ -204,7 +204,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     style: TextStyle(fontSize: 16,color: Color.fromARGB(255, 150, 149, 149)),
                   ),
                   TextFormField(
-                      controller: _locationController,
+                      controller: location,
                       validator: (value) => value!.isEmpty ? 'Please enter your location' : null,
                       style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(

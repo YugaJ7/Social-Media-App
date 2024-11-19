@@ -131,6 +131,8 @@ class AppwriteService {
     }
   }
 
+
+
 // Fetch username from database
 Future<Map<String, dynamic>?> fetchUserProfile(String userId) async {
   try {
@@ -247,16 +249,37 @@ Future<bool> sendPasswordResetEmail(String email) async {
     }
   }
 
-  static Future<void> _fetchImage(String fileId) async{
+  static Future<List<String>> fetchPostImages(String userId) async {
     try {
-      final response = await storage.getFile(
-          bucketId: '672f4201001100487dad',
-          fileId: fileId
+      final files = await storage.listFiles(
+        bucketId: '672f4201001100487dad',
       );
-      print('File fetched successfully');
-    } catch(e){
-      print('Error fetching image: $e');
+
+      final filteredFiles = files.files.where((file) => file.$id.endsWith(userId)).toList();
+
+      return filteredFiles.map((file) => file.$id).toList();
+    } catch (e) {
+      print('Error fetching post images: $e');
+      return [];
     }
+  }
+
+  Future<String?> uploadPostImage(String userId,File imageFile) async {
+    try {
+      final result = await storage.createFile(
+        bucketId: '673b2320001fb517dae7',
+        fileId: userId,
+        file: InputFile.fromPath(path: imageFile.path),
+      );
+      return result.$id;
+    } catch (e) {
+      print('Error uploading profile image: $e');
+      return null;
+    }
+  }
+
+  String getImageurl(String fileId) {
+    return 'https://cloud.appwrite.io/v1/storage/buckets/672f4201001100487dad/files/$fileId/view?project=672cc1fd002f9dce00dd';
   }
 
   static Future<void> likeMedia(String mediaId, String userId) async{

@@ -14,21 +14,119 @@ class PostCreation extends StatefulWidget{
 }
 
 class _PostCreationState extends State<PostCreation> {
+  final AppwriteService appwriteService = AppwriteService();
+  List<String> mediaFileIds = [];
+  bool isLoading = true;
   List<String> imageFileIds = [];
   String imagePath = "";
   String? userId;
   @override
   void initState() {
     super.initState();
-    _getCurrentUser();
+    loadUserMedia();
+    loadUserPost();
+
   }
+  Future<void> loadUserPost() async {
+    try {
+      final session = await appwriteService.getCurrentSession();
+      userId = session?.userId;
+
+      if (userId != null) {
+        final List<String> mediaFileIds = await AppwriteService.fetchPostImages(userId!);
+
+        if (mediaFileIds.isNotEmpty) {
+          final String selectedImageId = mediaFileIds.first;
+          String selectedImageUrl =
+              'https://cloud.appwrite.io/v1/storage/buckets/672f4201001100487dad/files/$selectedImageId/view?project=672cc1fd002f9dce00dd';
+
+          setState(() {
+            isLoading = false;
+            this.mediaFileIds = mediaFileIds;
+            imagePath = selectedImageUrl;
+          });
+
+          print('Selected Image URL: $selectedImageUrl');
+        } else {
+          setState(() {
+            isLoading = false;
+          });
+          print('No images found for the user.');
+        }
+      } else {
+        print('User ID is null. Cannot fetch media.');
+      }
+    } catch (e) {
+      print('Error loading user media: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+  Future<void> loadUserMedia() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+      final session = await appwriteService.getCurrentSession();
+      final userId = session!.userId;
+
+      mediaFileIds = await AppwriteService.fetchPostImages(userId);
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading media: $e');
+    }
+  }
+  void showMedia({required String url, required String fileId}) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.white.withOpacity(0),
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+              Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  url,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red, size: 40),
+                onPressed: () async {
+                  await AppwriteService.deletionImage(fileId);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
 
   Future<void> _getCurrentUser() async {
     try {
-      final account = Account(AppwriteService.client); // Use your Appwrite client
-      final user = await account.get(); // Get current logged-in user
+      final user = await appwriteService.getCurrentUserId();
       setState(() {
-        userId = user.$id; // Store user ID
+        userId = user; // Store user ID
       });
     } catch (e) {
       print("Error getting current user: $e");
@@ -40,7 +138,7 @@ class _PostCreationState extends State<PostCreation> {
     try{
       await AppwriteService.deletionImage(fileId);
       setState(() {
-        imageFileIds.remove(fileId); // Remove from the list after deletion
+        imageFileIds.remove(fileId);
       });
     } catch (e) {
       print('Failed to delete image: $e');
@@ -66,6 +164,8 @@ class _PostCreationState extends State<PostCreation> {
       }
     }
   }
+
+
 
 
   Widget build(BuildContext context) {

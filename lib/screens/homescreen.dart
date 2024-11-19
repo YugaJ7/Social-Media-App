@@ -18,88 +18,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
-  List<String> imageFileIds = [];
-  String imagePath = "";
-  String? userId;
-  List<File> uploadedImages = [];
 
   @override
   void initState() {
     super.initState();
-    _getCurrentUser();
-    _fetchImage();
+
   }
-
-
-  Future<void> _getCurrentUser() async {
-    try {
-      final account = Account(AppwriteService.client); // Use your Appwrite client
-      final user = await account.get(); // Get current logged-in user
-      setState(() {
-        userId = user.$id; // Store user ID
-      });
-    } catch (e) {
-      print("Error getting current user: $e");
-    }
-  }
-
-  Future<void> _fetchImage() async {
-    if(userId!= null) {
-      try {
-        final fetchedFields = await AppwriteService.getUploadedImages(userId!);
-        setState(() {
-          imageFileIds = fetchedFields;
-        });
-        for (var fileId in imageFileIds) {
-          final imageFile = await AppwriteService.getImageFile(fileId);
-          setState(() {
-            uploadedImages.add(imageFile);
-          });
-        }
-      } catch (e) {
-        print("Error getting current user: $e");
-      }
-    }
-  }
-
-
-  // Future<void> deleteImage(String fileId) async {
-  //   try{
-  //     await AppwriteService.deletionImage(fileId);
-  //     setState(() {
-  //       imageFileIds.remove(fileId); // Remove from the list after deletion
-  //     });
-  //   } catch (e) {
-  //     print('Failed to delete image: $e');
-  //   }
-  // }
 
 
   void _onItemTapped(int index) {
     setState(() {
     });
   }
-
-
-  // Future<void> _pickAndUploadImage() async {
-  //   final ImagePicker picker = ImagePicker();
-  //   final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-  //   if (image != null) {
-  //     setState(() {
-  //       imagePath = image.path;
-  //     });
-  //     File file = File(imagePath);
-  //     if (userId != null) {
-  //       try {
-  //         await AppwriteService.uploadImage(file, userId!);
-  //       } catch (e) {
-  //         print("Error uploading image: $e");
-  //       }
-  //     } else {
-  //       print("User ID is null, cannot upload image.");
-  //     }
-  //   }
-  // }
 
 
 

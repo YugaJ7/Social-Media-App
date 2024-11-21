@@ -280,7 +280,6 @@ class _FeedScreenState extends State<FeedScreen> {
             ],
           ),
         ),
-        // Add more content cards here if needed.
       ],
     );
   }
@@ -308,7 +307,6 @@ class CommunityScreen extends StatelessWidget {
               ),
               Row(
                 children: [
-                  // Leading CircleAvatar and Text Information
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: CircleAvatar(
@@ -335,7 +333,6 @@ class CommunityScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Join Button
                   TextButton(
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.white,
@@ -359,7 +356,6 @@ class CommunityScreen extends StatelessWidget {
               ),
               Row(
                 children: [
-                  // Leading CircleAvatar and Text Information
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: CircleAvatar(
@@ -386,7 +382,6 @@ class CommunityScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Join Button
                   TextButton(
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.white,
@@ -478,8 +473,6 @@ class CommunityScreen extends StatelessWidget {
             ],
           ),
         ),
-
-        // Add more cards as needed
       ],
     );
   }

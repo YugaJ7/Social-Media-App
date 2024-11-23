@@ -17,7 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final AppwriteService appwriteService = AppwriteService();
+
   List<String> imageFileIds = [];
   String imagePath = "";
   String? userId;
@@ -42,64 +42,10 @@ class _HomeScreenState extends State<HomeScreen> {
       print("Error getting current user: $e");
     }
   }
-
-  // Future<void> _fetchImage() async {
-  //   if(userId!= null) {
-  //     try {
-  //       final fetchedFields = await AppwriteService.getUploadedImages(userId!);
-  //       setState(() {
-  //         imageFileIds = fetchedFields;
-  //       });
-  //       for (var fileId in imageFileIds) {
-  //         final imageFile = await AppwriteService.getImageFile(fileId);
-  //         setState(() {
-  //           uploadedImages.add(imageFile);
-  //         });
-  //       }
-  //     } catch (e) {
-  //       print("Error getting current user: $e");
-  //     }
-  //   }
-  // }
-
-
-  // Future<void> deleteImage(String fileId) async {
-  //   try{
-  //     await AppwriteService.deletionImage(fileId);
-  //     setState(() {
-  //       imageFileIds.remove(fileId); // Remove from the list after deletion
-  //     });
-  //   } catch (e) {
-  //     print('Failed to delete image: $e');
-  //   }
-  // }
-
-
-  void _onItemTapped(int index) {
+void _onItemTapped(int index) {
     setState(() {
     });
   }
-
-
-  // Future<void> _pickAndUploadImage() async {
-  //   final ImagePicker picker = ImagePicker();
-  //   final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-  //   if (image != null) {
-  //     setState(() {
-  //       imagePath = image.path;
-  //     });
-  //     File file = File(imagePath);
-  //     if (userId != null) {
-  //       try {
-  //         await AppwriteService.uploadImage(file, userId!);
-  //       } catch (e) {
-  //         print("Error uploading image: $e");
-  //       }
-  //     } else {
-  //       print("User ID is null, cannot upload image.");
-  //     }
-  //   }
-  // }
 
 
 
@@ -147,7 +93,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         body: TabBarView(
           children: [
-            FeedScreen(mediaId: '', userId: '',),
+            //FeedScreen(mediaId: '', userId: '',),
+            FeedScreen(),
             CommunityScreen(),
             ExploreScreen(),
           ],
@@ -169,189 +116,345 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class FeedScreen extends StatefulWidget {
-  final String mediaId;
-  final String userId;
-  const FeedScreen({
-    Key? key,
-    required this.mediaId,
-    required this.userId,}) : super(key: key);
+// class FeedScreen extends StatefulWidget {
+//   final String mediaId;
+//   final String userId;
+//   const FeedScreen({
+//     Key? key,
+//     required this.mediaId,
+//     required this.userId,}) : super(key: key);
 
+//   @override
+//   State<FeedScreen> createState() => _FeedScreenState();
+// }
+
+// class _FeedScreenState extends State<FeedScreen> {
+//   bool isLike = false;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _checkLikeStatus();
+//   }
+
+//   Future<void> _checkLikeStatus() async {
+//     bool liked = await AppwriteService.isMediaLiked(widget.mediaId, widget.userId);
+//     setState(() {
+//       isLike = liked;
+//     });
+//   }
+
+//   Future<void> _toggleLike() async {
+//     if (isLike) {
+//       await AppwriteService.unlikeMedia(widget.mediaId, widget.userId);
+//     } else {
+//       await AppwriteService.likeMedia(widget.mediaId, widget.userId);
+//     }
+//     setState(() {
+//       isLike = !isLike;
+//     });
+//   }
+
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return ListView(
+//       padding: const EdgeInsets.all(8.0),
+//       children: [
+//         Card(
+//           color: Colors.white,
+//           margin: const EdgeInsets.symmetric(vertical: 8),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               ListTile(
+//                 leading: const CircleAvatar(
+//                   backgroundImage: AssetImage('assets/images/joshan.jpg'),
+//                 ),
+//                 title: Row(
+//                   children: const [
+//                     Text(
+//                       "Jashon Thiago",
+//                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
+//                     ),
+//                     SizedBox(width: 4),
+//                     Text(
+//                       "@jashon.thiago",
+//                       style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//               const Padding(
+//                 padding: EdgeInsets.only(top: 8, left: 56, right: 16),
+//                 child: Text("Me:", style: TextStyle(fontSize: 17)),
+//               ),
+//               const Padding(
+//                 padding: EdgeInsets.only(left: 56, right: 16),
+//                 child: Text("I only use auto layout when I'm designing components for reusability", style: TextStyle(fontSize: 17)),
+//               ),
+//               const Padding(
+//                 padding: EdgeInsets.only(left: 56, right: 16),
+//                 child: Text("Also me:", style: TextStyle(fontSize: 17)),
+//               ),
+//               const Padding(
+//                 padding: EdgeInsets.only(left: 56, right: 16),
+//                 child: Text("I hate reusing components with auto layout", style: TextStyle(fontSize: 17)),
+//               ),
+//               Padding(
+//                 padding: const EdgeInsets.only(left: 56, right: 16, top: 8),
+//                 child: Row(
+//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                   children: [
+//                     IconButton(
+//                       onPressed:  _toggleLike,
+//                       icon: Icon(
+//                           isLike? FontAwesomeIcons.solidHeart: FontAwesomeIcons.heart,
+//                           color: isLike? Colors.red : Colors.grey),
+//                     ),
+//                     IconButton(
+//                       onPressed: () {},
+//                       icon: const Icon(FontAwesomeIcons.commentDots, color: Colors.grey),
+//                     ),
+//                     IconButton(
+//                       onPressed: () {},
+//                       icon: const Icon(FontAwesomeIcons.paperPlane, color: Colors.grey),
+//                     ),
+//                     IconButton(
+//                       onPressed: () {},
+//                       icon: const Icon(FontAwesomeIcons.ellipsisVertical, color: Colors.grey),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//         Card(
+//           color: Colors.white,
+//           margin: const EdgeInsets.symmetric(vertical: 8),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               ListTile(
+//                 leading: const CircleAvatar(
+//                   backgroundImage: AssetImage('assets/images/NetflixIcon2016.webp'),
+//                 ),
+//                 title: Row(
+//                   children: const [
+//                     Text(
+//                       "Netflix ID",
+//                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
+//                     ),
+//                     SizedBox(width: 4),
+//                     Text(
+//                       "@netflix.id",
+//                       style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//               const Padding(
+//                 padding: EdgeInsets.only(top: 8, left: 56, right: 16),
+//                 child: Text("it's all about the looks. LUPIN part 3, October 5 on Netflix", style: TextStyle(fontSize: 17)),
+//               ),
+//               Padding(
+//                 padding: const EdgeInsets.only(left: 56, right: 16, top: 8),
+//                 child: ClipRRect(
+//                   borderRadius: BorderRadius.circular(16),
+//                   child: Image.asset(
+//                     'assets/images/lupin.jpeg',
+//                     fit: BoxFit.cover,
+//                   ),
+//                 ),
+//               ),
+//               Padding(
+//                 padding: const EdgeInsets.only(left: 56, right: 16, top: 8),
+//                 child: Row(
+//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                   children: [
+//                     IconButton(
+//                       onPressed:  _toggleLike,
+//                       icon: Icon(
+//                           isLike? FontAwesomeIcons.solidHeart: FontAwesomeIcons.heart,
+//                           color: isLike? Colors.red : Colors.grey),
+//                     ),
+//                     IconButton(
+//                       onPressed: () {},
+//                       icon: const Icon(FontAwesomeIcons.commentDots, color: Colors.grey),
+//                     ),
+//                     IconButton(
+//                       onPressed: () {},
+//                       icon: const Icon(FontAwesomeIcons.paperPlane, color: Colors.grey),
+//                     ),
+//                     IconButton(
+//                       onPressed: () {},
+//                       icon: const Icon(FontAwesomeIcons.ellipsisVertical, color: Colors.grey),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ],
+//     );
+//   }
+// }
+
+class FeedScreen extends StatefulWidget {
+  const FeedScreen({super.key});
   @override
   State<FeedScreen> createState() => _FeedScreenState();
 }
 
 class _FeedScreenState extends State<FeedScreen> {
-  bool isLike = false;
+  final AppwriteService appwriteService = AppwriteService();
+  List<Map<String, dynamic>> postsWithUserData = []; 
+  bool isLoading = true; 
+  bool isLike = false; 
 
   @override
   void initState() {
     super.initState();
-    _checkLikeStatus();
+    _fetchPostsWithUserData();
   }
+  Future<void> _fetchPostsWithUserData() async {
+  try {
+    List<dynamic> posts = await appwriteService.getPosts();
 
-  Future<void> _checkLikeStatus() async {
-    bool liked = await AppwriteService.isMediaLiked(widget.mediaId, widget.userId);
-    setState(() {
-      isLike = liked;
-    });
-  }
-
-  Future<void> _toggleLike() async {
-    if (isLike) {
-      await AppwriteService.unlikeMedia(widget.mediaId, widget.userId);
-    } else {
-      await AppwriteService.likeMedia(widget.mediaId, widget.userId);
+    List<Map<String, dynamic>> fetchedPosts = [];
+    for (var post in posts) {
+      String userId = post.data['userId'] ?? ''; 
+      print('User ID: $userId');
+      Map<String, dynamic>? userProfile = await appwriteService.fetchUserProfileById(userId);
+      print('User Profile: $userProfile');
+      fetchedPosts.add({
+        'username': userProfile?['username'] ?? 'Unknown', // Fallback for null
+        'displayName': userProfile?['displayName'] ?? 'Unknown',
+        'profileImage': userProfile?['profileImageId'] ?? '', // Use empty string as default
+        'title': post.data['title'] ?? '', // Fallback to empty string
+        'image': post.data['postImageId'] ?? '', // Fallback to empty string
+      });
     }
+
     setState(() {
-      isLike = !isLike;
+      postsWithUserData = fetchedPosts;
+      isLoading = false;
+    });
+  } catch (e) {
+    print('Error fetching data: $e');
+    setState(() {
+      isLoading = false;
     });
   }
-
-
+}
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return ListView.builder(
+      itemCount: postsWithUserData.length,
       padding: const EdgeInsets.all(8.0),
-      children: [
-        Card(
+      itemBuilder: (context, index) {
+        final post = postsWithUserData[index];
+        return Card(
           color: Colors.white,
           margin: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ListTile(
-                leading: const CircleAvatar(
-                  backgroundImage: AssetImage('assets/images/joshan.jpg'),
-                ),
-                title: Row(
-                  children: const [
-                    Text(
-                      "Jashon Thiago",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16.0,right: 8),
+                    child: CircleAvatar(
+                      radius: 35,
+                      backgroundImage: NetworkImage(appwriteService.getImageUrl(post['profileImage'])),
                     ),
-                    SizedBox(width: 4),
-                    Text(
-                      "@jashon.thiago",
-                      style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(top: 8, left: 56, right: 16),
-                child: Text("Me:", style: TextStyle(fontSize: 17)),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(left: 56, right: 16),
-                child: Text("I only use auto layout when I'm designing components for reusability", style: TextStyle(fontSize: 17)),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(left: 56, right: 16),
-                child: Text("Also me:", style: TextStyle(fontSize: 17)),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(left: 56, right: 16),
-                child: Text("I hate reusing components with auto layout", style: TextStyle(fontSize: 17)),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 56, right: 16, top: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      onPressed:  _toggleLike,
-                      icon: Icon(
-                          isLike? FontAwesomeIcons.solidHeart: FontAwesomeIcons.heart,
-                          color: isLike? Colors.red : Colors.grey),
-                    ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(FontAwesomeIcons.commentDots, color: Colors.grey),
-                    ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(FontAwesomeIcons.paperPlane, color: Colors.grey),
-                    ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(FontAwesomeIcons.ellipsisVertical, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Card(
-          color: Colors.white,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                leading: const CircleAvatar(
-                  backgroundImage: AssetImage('assets/images/NetflixIcon2016.webp'),
-                ),
-                title: Row(
-                  children: const [
-                    Text(
-                      "Netflix ID",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
-                    ),
-                    SizedBox(width: 4),
-                    Text(
-                      "@netflix.id",
-                      style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(top: 8, left: 56, right: 16),
-                child: Text("it's all about the looks. LUPIN part 3, October 5 on Netflix", style: TextStyle(fontSize: 17)),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 56, right: 16, top: 8),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    'assets/images/lupin.jpeg',
-                    fit: BoxFit.cover,
                   ),
-                ),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              post['displayName'],
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 19),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              "@${post['username']}",
+                              style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          post['title'],
+                          style: const TextStyle(fontSize: 17),
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                      if (post['image'] != null)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.network(
+                            appwriteService.getImageUrl(post['image']),
+                            fit: BoxFit.fitWidth,
+                            width: MediaQuery.of(context).size.width*0.65,
+                            height: MediaQuery.of(context).size.height*.38,
+                          ),
+                        ),           
+                      ],
+                    )
+                  )
+                ]
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 56, right: 16, top: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      onPressed:  _toggleLike,
-                      icon: Icon(
-                          isLike? FontAwesomeIcons.solidHeart: FontAwesomeIcons.heart,
-                          color: isLike? Colors.red : Colors.grey),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  SizedBox(
+                    width: 50,
+                  ),
+                  IconButton(
+                    onPressed: (){},
+                    icon: Icon(
+                      isLike
+                          ? FontAwesomeIcons.solidHeart
+                          : FontAwesomeIcons.heart,
+                      color: isLike ? Colors.red : Colors.grey,
                     ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(FontAwesomeIcons.commentDots, color: Colors.grey),
-                    ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(FontAwesomeIcons.paperPlane, color: Colors.grey),
-                    ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(FontAwesomeIcons.ellipsisVertical, color: Colors.grey),
-                    ),
-                  ],
-                ),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(FontAwesomeIcons.commentDots,
+                        color: Colors.grey),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(FontAwesomeIcons.paperPlane,
+                        color: Colors.grey),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(FontAwesomeIcons.ellipsisVertical,
+                        color: Colors.grey),
+                  ),
+                ],
               ),
             ],
           ),
-        ),
-        // Add more content cards here if needed.
-      ],
+        );
+      },
     );
   }
 }
@@ -378,7 +481,6 @@ class CommunityScreen extends StatelessWidget {
               ),
               Row(
                 children: [
-                  // Leading CircleAvatar and Text Information
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: CircleAvatar(
@@ -405,7 +507,6 @@ class CommunityScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Join Button
                   TextButton(
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.white,
@@ -429,7 +530,6 @@ class CommunityScreen extends StatelessWidget {
               ),
               Row(
                 children: [
-                  // Leading CircleAvatar and Text Information
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: CircleAvatar(
@@ -456,7 +556,6 @@ class CommunityScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Join Button
                   TextButton(
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.white,
@@ -548,8 +647,6 @@ class CommunityScreen extends StatelessWidget {
             ],
           ),
         ),
-
-        // Add more cards as needed
       ],
     );
   }

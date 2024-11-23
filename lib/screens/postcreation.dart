@@ -1,111 +1,134 @@
-import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:appwrite/appwrite.dart';
-import 'package:social_media_app/services/appwrite_service.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import '../services/appwrite_service.dart';
 
-class PostCreation extends StatefulWidget{
-  const PostCreation({Key? key}) : super(key: key);
+class PostCreation extends StatefulWidget {
   @override
-  State<PostCreation> createState() => _PostCreationState();
+  _PostCreationState createState() => _PostCreationState();
 }
 
 class _PostCreationState extends State<PostCreation> {
   final AppwriteService appwriteService = AppwriteService();
-  List<String> imageFileIds = [];
-  String imagePath = "";
-  String? userId;
-  @override
-  void initState() {
-    super.initState();
-    _getCurrentUser();
-  }
+  final TextEditingController _titleController = TextEditingController();
+  File? _selectedImage;
 
-  Future<void> _getCurrentUser() async {
-    try {
-      final user = await appwriteService.getCurrentUserId(); 
-      setState(() {
-        userId = user; 
-      });
-    } catch (e) {
-      print("Error getting current user: $e");
-    }
-  }
-
-
-  Future<void> deleteImage(String fileId) async {
-    try{
-      await AppwriteService.deletionImage(fileId);
-      setState(() {
-        imageFileIds.remove(fileId); 
-      });
-    } catch (e) {
-      print('Failed to delete image: $e');
-    }
-  }
-
-  Future<void> _pickAndUploadImage() async {
+  Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
     if (image != null) {
       setState(() {
-        imagePath = image.path;
+        _selectedImage = File(image.path);
       });
-      File file = File(imagePath);
-      if (userId != null) {
-        try {
-          await AppwriteService.uploadImage(file, userId!);
-        } catch (e) {
-          print("Error uploading image: $e");
-        }
-      } else {
-        print("User ID is null, cannot upload image.");
-      }
     }
   }
 
+  Future<void> _postFeed() async {
+    if (_titleController.text.isEmpty || _selectedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please provide a title and select an image')),
+      );
+      return;
+    }
 
+    try {
+      final userId = await appwriteService.getCurrentUserId();
+      final imageId = await AppwriteService.uploadImage(_selectedImage!,userId!);
+
+      await appwriteService.createpost(
+        userId, 
+        _titleController.text, 
+        imageId);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Post created successfully!')),
+      );
+      Navigator.pop(context); 
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error creating post: $e')),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        leadingWidth: 100,
-        leading: TextButton(
-            onPressed: (){
-              Navigator.pop(context);
-            },
-            child: Text('Cancel', style: TextStyle(color: Colors.black, fontSize: 16))),
-        actions: [
-          TextButton(
-              onPressed: (){},
-              child: Text('Post Feed', style: TextStyle(
-                color: Colors.black
-              ),)
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: _pickImage,
+        backgroundColor: Colors.grey,
+        shape: const CircleBorder(),
+        child: const Icon(
+          FontAwesomeIcons.camera,
+          color: Colors.white,
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: TextField(
-          decoration: InputDecoration(
-            hintText: 'Share your post and idea',
-            hintStyle: TextStyle(
-              color: Colors.grey,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.grey, fontSize: 18),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _postFeed,
+                      child: Text(
+                        'Post Feed',
+                        style: TextStyle(color: Colors.blue, fontSize: 18),
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(height: .1, color: Color.fromARGB(255, 230, 230, 230),),
+                TextField(
+                  controller: _titleController,
+                  maxLines: null,
+                  decoration: InputDecoration(
+                    hintText: "Share your post and idea",
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(color: Colors.grey)
+                  ),
+                ),
+                if (_selectedImage != null)
+                  Stack(
+                    children: [
+                      Image.file(_selectedImage!),
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: CircleAvatar(
+                          backgroundColor: Colors.grey.withOpacity(.2),
+                          child: IconButton(
+                            icon: Icon(Icons.close, color: Colors.red,size: 24,),
+                            onPressed: () {
+                              setState(() {
+                                _selectedImage = null;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
             ),
-            border: InputBorder.none,
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-          onPressed: _pickAndUploadImage,
-        backgroundColor: Colors.white,
-        child: const Icon(FontAwesomeIcons.camera, color: Colors.grey,),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

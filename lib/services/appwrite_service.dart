@@ -216,23 +216,25 @@ Future<bool> sendPasswordResetEmail(String email) async {
   }
 }
 
-  static Future<void> uploadImage(File imageFile, String userId)async{
+   static Future<String?> uploadImage(File imageFile, String userId)async{
     try{
       const String chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       final Random random = Random();
       final String shortUniqueId = List.generate(5, (index) => chars[random.nextInt(chars.length)]).join();
       final String uniqueFileId = '${shortUniqueId}_$userId';
-      await storage.createFile(
+      final result = await storage.createFile(
         bucketId: '672f4201001100487dad',
         fileId: uniqueFileId,
         file: InputFile.fromPath(path: imageFile.path),
       );
       print('File uploaded successfully');
+      return result.$id;
     } catch (e) {
       print('Error uploading image: $e');
+      return null;
     }
   }
-
+// Deleting a image
   static Future<void> deletionImage(String fileId) async{
     try{
       await storage.deleteFile(
@@ -352,20 +354,21 @@ Future<Map<String, dynamic>?> fetchUserProfileById(String documentId) async {
     return null;
   }
 }
-
-Future<void> createpost(String userId, String username, String displayName, String bio, String interest, String location, String? imageId) async {
+//adding a post in database
+Future<void> createpost(String userId, String title, String? imageId) async {
     try {
+      const String chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      final Random random = Random();
+      final String shortUniqueId = List.generate(5, (index) => chars[random.nextInt(chars.length)]).join();
+      final String uniqueId = '${shortUniqueId}_$userId';
       await database.createDocument(
         databaseId: '672e094b003b610078c0',
-        collectionId: '672e09f40035b32645dc', 
-        documentId: userId,  
+        collectionId: '673b2320001fb517dae7', 
+        documentId: uniqueId,  
         data: {
-          'username': username,
-          'displayName': displayName,
-          'bio': bio,
-          'interest': interest,
-          'location': location,
-          'profileImageId': imageId,
+          'userId': userId,
+          'title': title,
+          'postImageId': imageId,
         },
       );
       print("Profile data added to database!");
@@ -373,3 +376,13 @@ Future<void> createpost(String userId, String username, String displayName, Stri
       print('Database error: $e');
     }
   }
+//fetching posts from post collection
+Future<List<dynamic>> getPosts() async {
+    // Fetch posts from the "Posts" collection
+    final response = await database.listDocuments(
+      databaseId: '672e094b003b610078c0',
+      collectionId: '673b2320001fb517dae7',
+    );
+    return response.documents;
+  }
+}

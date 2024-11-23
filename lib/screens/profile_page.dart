@@ -21,12 +21,15 @@ class _ProfilePageState extends State<ProfilePage> {
   String? location;
   String? profileImageId;
   List<String> mediaFileIds = []; 
+  List<Map<String, dynamic>> userPosts = [];
    bool isLoading = true;
+   bool isLike = false; 
 
   @override
   void initState() {
     super.initState();
     loadUserProfile();
+    loadUserPosts();
     loadUserMedia();
   }
 
@@ -56,6 +59,37 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     } catch (e) {
       print('Error loading user profile: $e');
+    }
+  }
+  Future<void> loadUserPosts() async {
+    try {
+      final session = await appwriteService.getCurrentSession();
+      final currentUserId = session!.userId;
+
+      // Fetch all posts
+      final allPosts = await appwriteService.getPosts();
+
+      // Filter posts where document ID ends with the current user ID
+      List<Map<String, dynamic>> filteredPosts = [];
+      for (var post in allPosts) {
+        String docId = post.$id; // Get the document ID
+        if (docId.endsWith(currentUserId)) {
+          filteredPosts.add({
+            'title': post.data['title'] ?? '',
+            'image': post.data['postImageId'] ?? '',
+          });
+        }
+      }
+
+      setState(() {
+        userPosts = filteredPosts;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading user posts: $e');
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -266,7 +300,110 @@ Widget build(BuildContext context) {
                   height: 400,
                   child: TabBarView(
                     children: [
-                      const Center(child: Text('Feeds Content')),
+                       isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : userPosts.isEmpty
+                                ? const Center(child: Text("No posts"))
+                                : ListView.builder(
+                                    itemCount: userPosts.length,
+                                    itemBuilder: (context, index) {
+                                      final post = userPosts[index];
+                                      return Card(
+                                        color: Colors.white,
+                                        margin: const EdgeInsets.symmetric(vertical: 8),
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets.only(right: 8),
+                                                  child: CircleAvatar(
+                                                    radius: 35,
+                                                    backgroundImage: NetworkImage(appwriteService.getImageUrl(profileImageId!)),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: EdgeInsets.all(8),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            displayName ?? '',
+                                                            style: const TextStyle(
+                                                                fontWeight: FontWeight.bold, fontSize: 19),
+                                                          ),
+                                                          const SizedBox(width: 4),
+                                                          Text(
+                                                            "@${username ?? 'Username'}",
+                                                            style: const TextStyle(
+                                                                fontSize: 14,
+                                                                color: Colors.grey,
+                                                                fontWeight: FontWeight.bold),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Text(
+                                                        post['title'],
+                                                        style: const TextStyle(fontSize: 17),
+                                                      ),
+                                                      SizedBox(
+                                                        height: 8,
+                                                      ),
+                                                    if (post['image'] != null)
+                                                      ClipRRect(
+                                                        borderRadius: BorderRadius.circular(16),
+                                                        child: Image.network(
+                                                          appwriteService.getImageUrl(post['image']),
+                                                          fit: BoxFit.fitWidth,
+                                                          width: MediaQuery.of(context).size.width*0.65,
+                                                          height: MediaQuery.of(context).size.height*.38,
+                                                        ),
+                                                      ),           
+                                                    ],
+                                                  )
+                                                )
+                                              ]
+                                            ),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                              children: [
+                                                SizedBox(
+                                                  width: 50,
+                                                ),
+                                                IconButton(
+                                                  onPressed: (){},
+                                                  icon: Icon(
+                                                    isLike
+                                                        ? FontAwesomeIcons.solidHeart
+                                                        : FontAwesomeIcons.heart,
+                                                    color: isLike ? Colors.red : Colors.grey,
+                                                  ),
+                                                ),
+                                                IconButton(
+                                                  onPressed: () {},
+                                                  icon: const Icon(FontAwesomeIcons.commentDots,
+                                                      color: Colors.grey),
+                                                ),
+                                                IconButton(
+                                                  onPressed: () {},
+                                                  icon: const Icon(FontAwesomeIcons.paperPlane,
+                                                      color: Colors.grey),
+                                                ),
+                                                IconButton(
+                                                  onPressed: () {},
+                                                  icon: const Icon(FontAwesomeIcons.ellipsisVertical,
+                                                      color: Colors.grey),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
                       isLoading
                         ? const Center(child: CircularProgressIndicator())
                         : mediaFileIds.isEmpty

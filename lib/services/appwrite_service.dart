@@ -245,6 +245,18 @@ Future<bool> sendPasswordResetEmail(String email) async {
     }
   }
 
+  static Future<void> _fetchImage(String fileId) async{
+    try {
+      final response = await storage.getFile(
+          bucketId: '672f4201001100487dad',
+          fileId: fileId
+      );
+      print('File fetched successfully');
+    } catch(e){
+      print('Error fetching image: $e');
+    }
+  }
+
   static Future<void> likeMedia(String mediaId, String userId) async{
     try{
       await database.createDocument(

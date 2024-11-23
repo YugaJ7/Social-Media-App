@@ -17,7 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
+  final AppwriteService appwriteService = AppwriteService();
   List<String> imageFileIds = [];
   String imagePath = "";
   String? userId;
@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _getCurrentUser();
-    _fetchImage();
+    //_fetchImage();
   }
 
 
@@ -43,24 +43,24 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _fetchImage() async {
-    if(userId!= null) {
-      try {
-        final fetchedFields = await AppwriteService.getUploadedImages(userId!);
-        setState(() {
-          imageFileIds = fetchedFields;
-        });
-        for (var fileId in imageFileIds) {
-          final imageFile = await AppwriteService.getImageFile(fileId);
-          setState(() {
-            uploadedImages.add(imageFile);
-          });
-        }
-      } catch (e) {
-        print("Error getting current user: $e");
-      }
-    }
-  }
+  // Future<void> _fetchImage() async {
+  //   if(userId!= null) {
+  //     try {
+  //       final fetchedFields = await AppwriteService.getUploadedImages(userId!);
+  //       setState(() {
+  //         imageFileIds = fetchedFields;
+  //       });
+  //       for (var fileId in imageFileIds) {
+  //         final imageFile = await AppwriteService.getImageFile(fileId);
+  //         setState(() {
+  //           uploadedImages.add(imageFile);
+  //         });
+  //       }
+  //     } catch (e) {
+  //       print("Error getting current user: $e");
+  //     }
+  //   }
+  // }
 
 
   // Future<void> deleteImage(String fileId) async {

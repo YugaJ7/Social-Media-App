@@ -353,5 +353,23 @@ Future<Map<String, dynamic>?> fetchUserProfileById(String documentId) async {
   }
 }
 
-
-}
+Future<void> createpost(String userId, String username, String displayName, String bio, String interest, String location, String? imageId) async {
+    try {
+      await database.createDocument(
+        databaseId: '672e094b003b610078c0',
+        collectionId: '672e09f40035b32645dc', 
+        documentId: userId,  
+        data: {
+          'username': username,
+          'displayName': displayName,
+          'bio': bio,
+          'interest': interest,
+          'location': location,
+          'profileImageId': imageId,
+        },
+      );
+      print("Profile data added to database!");
+    } catch (e) {
+      print('Database error: $e');
+    }
+  }

@@ -14,6 +14,7 @@ class PostCreation extends StatefulWidget{
 }
 
 class _PostCreationState extends State<PostCreation> {
+  final AppwriteService appwriteService = AppwriteService();
   List<String> imageFileIds = [];
   String imagePath = "";
   String? userId;
@@ -25,10 +26,9 @@ class _PostCreationState extends State<PostCreation> {
 
   Future<void> _getCurrentUser() async {
     try {
-      final account = Account(AppwriteService.client); // Use your Appwrite client
-      final user = await account.get(); // Get current logged-in user
+      final user = await appwriteService.getCurrentUserId(); 
       setState(() {
-        userId = user.$id; // Store user ID
+        userId = user; 
       });
     } catch (e) {
       print("Error getting current user: $e");
@@ -40,7 +40,7 @@ class _PostCreationState extends State<PostCreation> {
     try{
       await AppwriteService.deletionImage(fileId);
       setState(() {
-        imageFileIds.remove(fileId); // Remove from the list after deletion
+        imageFileIds.remove(fileId); 
       });
     } catch (e) {
       print('Failed to delete image: $e');

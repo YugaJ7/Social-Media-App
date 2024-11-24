@@ -23,7 +23,7 @@ class _ProfilePageState extends State<ProfilePage> {
   List<String> mediaFileIds = []; 
   List<Map<String, dynamic>> userPosts = [];
    bool isLoading = true;
-   bool isLike = false; 
+  Map<String, bool> postLikeStatus = {};
 
   @override
   void initState() {
@@ -65,22 +65,18 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       final session = await appwriteService.getCurrentSession();
       final currentUserId = session!.userId;
-
-      // Fetch all posts
       final allPosts = await appwriteService.getPosts();
-
-      // Filter posts where document ID ends with the current user ID
       List<Map<String, dynamic>> filteredPosts = [];
       for (var post in allPosts) {
-        String docId = post.$id; // Get the document ID
+        String docId = post.$id; 
         if (docId.endsWith(currentUserId)) {
           filteredPosts.add({
+            'postId': docId,
             'title': post.data['title'] ?? '',
             'image': post.data['postImageId'] ?? '',
           });
         }
       }
-
       setState(() {
         userPosts = filteredPosts;
         isLoading = false;
@@ -142,6 +138,9 @@ class _ProfilePageState extends State<ProfilePage> {
               icon: const Icon(Icons.delete, color: Colors.red, size: 40),
               onPressed: () async => {
                 await AppwriteService.deletionImage(fileid),
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Media deleted successfully')),
+                ),
                 Navigator.pop(context)
               },
             ),
@@ -186,6 +185,45 @@ void show_profile_image({required String url}) {
     ),
   );
 }
+void _showBottomSheet(BuildContext context, String postId) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) {
+      return Wrap(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.delete, color: Colors.red),
+            title: const Text('Delete'),
+            onTap: () {
+              Navigator.pop(context);
+              _deletePost(postId);
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+Future<void> _deletePost(String postId) async {
+  try {
+    await appwriteService.deletePost(postId); 
+    setState(() {
+      userPosts.removeWhere((post) => post['postId'] == postId);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Post deleted successfully!')),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error deleting post: $e')),
+    );
+  }
+}
+
 
   @override
 Widget build(BuildContext context) {
@@ -308,6 +346,8 @@ Widget build(BuildContext context) {
                                     itemCount: userPosts.length,
                                     itemBuilder: (context, index) {
                                       final post = userPosts[index];
+                                      final postId = post['postId'];
+                                      final isLike = postLikeStatus[postId] ?? false;
                                       return Card(
                                         color: Colors.white,
                                         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -374,7 +414,11 @@ Widget build(BuildContext context) {
                                                   width: 50,
                                                 ),
                                                 IconButton(
-                                                  onPressed: (){},
+                                                  onPressed: (){
+                                                    setState(() {
+                                                      postLikeStatus[postId] = !isLike; // Toggle the like state
+                                                    });
+                                                  },
                                                   icon: Icon(
                                                     isLike
                                                         ? FontAwesomeIcons.solidHeart
@@ -393,7 +437,9 @@ Widget build(BuildContext context) {
                                                       color: Colors.grey),
                                                 ),
                                                 IconButton(
-                                                  onPressed: () {},
+                                                  onPressed: () {
+                                                     _showBottomSheet(context, post['postId']);
+                                                  },
                                                   icon: const Icon(FontAwesomeIcons.ellipsisVertical,
                                                       color: Colors.grey),
                                                 ),

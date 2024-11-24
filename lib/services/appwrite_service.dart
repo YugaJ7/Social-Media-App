@@ -378,11 +378,18 @@ Future<void> createpost(String userId, String title, String? imageId) async {
   }
 //fetching posts from post collection
 Future<List<dynamic>> getPosts() async {
-    // Fetch posts from the "Posts" collection
     final response = await database.listDocuments(
       databaseId: '672e094b003b610078c0',
       collectionId: '673b2320001fb517dae7',
     );
     return response.documents;
   }
+ //deleting a post from post collection 
+  Future<void> deletePost(String postId) async {
+  await database.deleteDocument(
+    databaseId: '672e094b003b610078c0',
+    collectionId: '673b2320001fb517dae7',
+    documentId: postId,
+  );
+}
 }

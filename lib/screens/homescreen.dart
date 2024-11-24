@@ -1,13 +1,10 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:social_media_app/screens/postcreation.dart';
 import 'package:social_media_app/services/appwrite_service.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:appwrite/appwrite.dart';
-import 'package:social_media_app/screens/postcreation.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -27,16 +24,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _getCurrentUser();
-    //_fetchImage();
   }
 
 
   Future<void> _getCurrentUser() async {
     try {
-      final account = Account(AppwriteService.client); // Use your Appwrite client
-      final user = await account.get(); // Get current logged-in user
+      final account = Account(AppwriteService.client); 
+      final user = await account.get();
       setState(() {
-        userId = user.$id; // Store user ID
+        userId = user.$id; 
       });
     } catch (e) {
       print("Error getting current user: $e");
@@ -93,7 +89,6 @@ void _onItemTapped(int index) {
         ),
         body: TabBarView(
           children: [
-            //FeedScreen(mediaId: '', userId: '',),
             FeedScreen(),
             CommunityScreen(),
             ExploreScreen(),
@@ -115,193 +110,6 @@ void _onItemTapped(int index) {
     );
   }
 }
-
-// class FeedScreen extends StatefulWidget {
-//   final String mediaId;
-//   final String userId;
-//   const FeedScreen({
-//     Key? key,
-//     required this.mediaId,
-//     required this.userId,}) : super(key: key);
-
-//   @override
-//   State<FeedScreen> createState() => _FeedScreenState();
-// }
-
-// class _FeedScreenState extends State<FeedScreen> {
-//   bool isLike = false;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _checkLikeStatus();
-//   }
-
-//   Future<void> _checkLikeStatus() async {
-//     bool liked = await AppwriteService.isMediaLiked(widget.mediaId, widget.userId);
-//     setState(() {
-//       isLike = liked;
-//     });
-//   }
-
-//   Future<void> _toggleLike() async {
-//     if (isLike) {
-//       await AppwriteService.unlikeMedia(widget.mediaId, widget.userId);
-//     } else {
-//       await AppwriteService.likeMedia(widget.mediaId, widget.userId);
-//     }
-//     setState(() {
-//       isLike = !isLike;
-//     });
-//   }
-
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return ListView(
-//       padding: const EdgeInsets.all(8.0),
-//       children: [
-//         Card(
-//           color: Colors.white,
-//           margin: const EdgeInsets.symmetric(vertical: 8),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               ListTile(
-//                 leading: const CircleAvatar(
-//                   backgroundImage: AssetImage('assets/images/joshan.jpg'),
-//                 ),
-//                 title: Row(
-//                   children: const [
-//                     Text(
-//                       "Jashon Thiago",
-//                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
-//                     ),
-//                     SizedBox(width: 4),
-//                     Text(
-//                       "@jashon.thiago",
-//                       style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//               const Padding(
-//                 padding: EdgeInsets.only(top: 8, left: 56, right: 16),
-//                 child: Text("Me:", style: TextStyle(fontSize: 17)),
-//               ),
-//               const Padding(
-//                 padding: EdgeInsets.only(left: 56, right: 16),
-//                 child: Text("I only use auto layout when I'm designing components for reusability", style: TextStyle(fontSize: 17)),
-//               ),
-//               const Padding(
-//                 padding: EdgeInsets.only(left: 56, right: 16),
-//                 child: Text("Also me:", style: TextStyle(fontSize: 17)),
-//               ),
-//               const Padding(
-//                 padding: EdgeInsets.only(left: 56, right: 16),
-//                 child: Text("I hate reusing components with auto layout", style: TextStyle(fontSize: 17)),
-//               ),
-//               Padding(
-//                 padding: const EdgeInsets.only(left: 56, right: 16, top: 8),
-//                 child: Row(
-//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                   children: [
-//                     IconButton(
-//                       onPressed:  _toggleLike,
-//                       icon: Icon(
-//                           isLike? FontAwesomeIcons.solidHeart: FontAwesomeIcons.heart,
-//                           color: isLike? Colors.red : Colors.grey),
-//                     ),
-//                     IconButton(
-//                       onPressed: () {},
-//                       icon: const Icon(FontAwesomeIcons.commentDots, color: Colors.grey),
-//                     ),
-//                     IconButton(
-//                       onPressed: () {},
-//                       icon: const Icon(FontAwesomeIcons.paperPlane, color: Colors.grey),
-//                     ),
-//                     IconButton(
-//                       onPressed: () {},
-//                       icon: const Icon(FontAwesomeIcons.ellipsisVertical, color: Colors.grey),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//         Card(
-//           color: Colors.white,
-//           margin: const EdgeInsets.symmetric(vertical: 8),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               ListTile(
-//                 leading: const CircleAvatar(
-//                   backgroundImage: AssetImage('assets/images/NetflixIcon2016.webp'),
-//                 ),
-//                 title: Row(
-//                   children: const [
-//                     Text(
-//                       "Netflix ID",
-//                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
-//                     ),
-//                     SizedBox(width: 4),
-//                     Text(
-//                       "@netflix.id",
-//                       style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//               const Padding(
-//                 padding: EdgeInsets.only(top: 8, left: 56, right: 16),
-//                 child: Text("it's all about the looks. LUPIN part 3, October 5 on Netflix", style: TextStyle(fontSize: 17)),
-//               ),
-//               Padding(
-//                 padding: const EdgeInsets.only(left: 56, right: 16, top: 8),
-//                 child: ClipRRect(
-//                   borderRadius: BorderRadius.circular(16),
-//                   child: Image.asset(
-//                     'assets/images/lupin.jpeg',
-//                     fit: BoxFit.cover,
-//                   ),
-//                 ),
-//               ),
-//               Padding(
-//                 padding: const EdgeInsets.only(left: 56, right: 16, top: 8),
-//                 child: Row(
-//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                   children: [
-//                     IconButton(
-//                       onPressed:  _toggleLike,
-//                       icon: Icon(
-//                           isLike? FontAwesomeIcons.solidHeart: FontAwesomeIcons.heart,
-//                           color: isLike? Colors.red : Colors.grey),
-//                     ),
-//                     IconButton(
-//                       onPressed: () {},
-//                       icon: const Icon(FontAwesomeIcons.commentDots, color: Colors.grey),
-//                     ),
-//                     IconButton(
-//                       onPressed: () {},
-//                       icon: const Icon(FontAwesomeIcons.paperPlane, color: Colors.grey),
-//                     ),
-//                     IconButton(
-//                       onPressed: () {},
-//                       icon: const Icon(FontAwesomeIcons.ellipsisVertical, color: Colors.grey),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
-
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
   @override
@@ -312,7 +120,7 @@ class _FeedScreenState extends State<FeedScreen> {
   final AppwriteService appwriteService = AppwriteService();
   List<Map<String, dynamic>> postsWithUserData = []; 
   bool isLoading = true; 
-  bool isLike = false; 
+  List<bool> isLikeList = [];
 
   @override
   void initState() {
@@ -330,17 +138,18 @@ class _FeedScreenState extends State<FeedScreen> {
       Map<String, dynamic>? userProfile = await appwriteService.fetchUserProfileById(userId);
       print('User Profile: $userProfile');
       fetchedPosts.add({
-        'username': userProfile?['username'] ?? 'Unknown', // Fallback for null
+        'username': userProfile?['username'] ?? 'Unknown', 
         'displayName': userProfile?['displayName'] ?? 'Unknown',
-        'profileImage': userProfile?['profileImageId'] ?? '', // Use empty string as default
-        'title': post.data['title'] ?? '', // Fallback to empty string
-        'image': post.data['postImageId'] ?? '', // Fallback to empty string
+        'profileImage': userProfile?['profileImageId'] ?? '', 
+        'title': post.data['title'] ?? '', 
+        'image': post.data['postImageId'] ?? '', 
       });
     }
 
     setState(() {
       postsWithUserData = fetchedPosts;
       isLoading = false;
+      isLikeList = List.generate(fetchedPosts.length, (index) => false);
     });
   } catch (e) {
     print('Error fetching data: $e');
@@ -426,12 +235,16 @@ class _FeedScreenState extends State<FeedScreen> {
                     width: 50,
                   ),
                   IconButton(
-                    onPressed: (){},
+                    onPressed: (){
+                      setState(() {
+                        isLikeList[index] = !isLikeList[index]; 
+                      });
+                    },
                     icon: Icon(
-                      isLike
+                      isLikeList[index]
                           ? FontAwesomeIcons.solidHeart
                           : FontAwesomeIcons.heart,
-                      color: isLike ? Colors.red : Colors.grey,
+                      color: isLikeList[index] ? Colors.red : Colors.grey,
                     ),
                   ),
                   IconButton(

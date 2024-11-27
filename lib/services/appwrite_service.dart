@@ -392,4 +392,44 @@ Future<List<dynamic>> getPosts() async {
     documentId: postId,
   );
 }
+Future<List<String>> fetchCommentsForPost(String postId) async {
+  try {
+    // Assuming comments are stored as an array of strings in a "comments" field
+    final post = await database.getDocument(
+      databaseId: '672e094b003b610078c0',
+      collectionId: '673b2320001fb517dae7',
+      documentId: postId
+      
+    );
+    print("DONE");
+    return List<String>.from(post.data['comment'] ?? []);
+  } catch (e) {
+    print('Error fetching comment: $e');
+    return [];
+  }
+}
+Future<void> addCommentToPost(String postId, String comment) async {
+  try {
+    final post = await database.getDocument(
+      databaseId: '672e094b003b610078c0',
+      collectionId: '673b2320001fb517dae7',
+      documentId: postId
+      
+    );
+
+    List<String> comments = List<String>.from(post.data['comment'] ?? []);
+    comments.add(comment);
+    print('DONEE');
+    await database.updateDocument(
+      databaseId: '672e094b003b610078c0',
+      collectionId: '673b2320001fb517dae7',
+      documentId: postId,
+      data: {'comment': comments},
+    );
+  } catch (e) {
+    print('Error adding comment: $e');
+  }
+}
+
+
 }

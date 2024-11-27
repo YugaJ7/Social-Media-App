@@ -416,7 +416,7 @@ Widget build(BuildContext context) {
                                                 IconButton(
                                                   onPressed: (){
                                                     setState(() {
-                                                      postLikeStatus[postId] = !isLike; // Toggle the like state
+                                                      postLikeStatus[postId] = !isLike; 
                                                     });
                                                   },
                                                   icon: Icon(
